@@ -1,0 +1,30 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    url: ${DB_URL:jdbc:mysql://host/database}
+    username: ${DB_USERNAME:username}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    properties:
+      hibernate:
+        ddl-auto: update
+    show-sql: false
+    generate-ddl: true
+
+
+
+app:
+  auth:
+    tokenSecret: 9a1c7805bb074f31f9b36fa510d0c743a557aa44f9b5b1cd6dbb7f8905b067c8
+    tokenExpiry: 7776000000 #3month
