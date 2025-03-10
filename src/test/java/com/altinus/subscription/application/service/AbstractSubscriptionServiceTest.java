@@ -1,21 +1,20 @@
 package com.altinus.subscription.application.service;
 
-import com.altinus.subscription.application.converter.ChannelConverter;
-import com.altinus.subscription.application.converter.SubscriptionConverter;
-import com.altinus.subscription.application.dto.request.SubscriptionCreateRequestDto;
-import com.altinus.subscription.application.dto.response.SubscriptionResponseDto;
-import com.altinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
-import com.altinus.subscription.application.service.impl.BasicSubscriptionService;
-import com.altinus.subscription.domain.model.Channel;
-import com.altinus.subscription.domain.model.Subscription;
-import com.altinus.subscription.domain.model.SubscriptionHistory;
-import com.altinus.subscription.domain.model.enums.SubscriptionStatus;
-import com.altinus.subscription.domain.repository.ChannelRepository;
-import com.altinus.subscription.domain.repository.SubscriptionDSLRepository;
-import com.altinus.subscription.domain.repository.SubscriptionHistoryRepository;
-import com.altinus.subscription.domain.repository.SubscriptionRepository;
-import com.altinus.subscription.infrastructure.external.dto.CsrngResponseDto;
-import com.altinus.subscription.infrastructure.external.service.CsrngExternalService;
+import com.artinus.subscription.application.converter.SubscriptionConverter;
+import com.artinus.subscription.application.dto.request.SubscriptionCreateRequestDto;
+import com.artinus.subscription.application.dto.response.SubscriptionResponseDto;
+import com.artinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
+import com.artinus.subscription.application.service.impl.BasicSubscriptionService;
+import com.artinus.subscription.domain.model.Channel;
+import com.artinus.subscription.domain.model.Subscription;
+import com.artinus.subscription.domain.model.SubscriptionHistory;
+import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
+import com.artinus.subscription.domain.repository.ChannelRepository;
+import com.artinus.subscription.domain.repository.SubscriptionDSLRepository;
+import com.artinus.subscription.domain.repository.SubscriptionHistoryRepository;
+import com.artinus.subscription.domain.repository.SubscriptionRepository;
+import com.artinus.subscription.infrastructure.external.dto.CsrngResponseDto;
+import com.artinus.subscription.infrastructure.external.service.CsrngExternalService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,10 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractSubscriptionServiceTest {
