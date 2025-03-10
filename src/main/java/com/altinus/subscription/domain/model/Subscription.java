@@ -1,5 +1,6 @@
 package com.altinus.subscription.domain.model;
 
+import com.altinus.common.domain.BaseEntity;
 import com.altinus.subscription.domain.model.enums.SubscriptionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "subscriptions")
-public class Subscription {
+public class Subscription extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -42,6 +42,9 @@ dependencies {
     // Spring Boot Configuration Processor
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 
+    // Demo를 위한 타임리프
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
     // 테스트 라이브러리
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testCompileOnly 'org.projectlombok:lombok:1.18.30'

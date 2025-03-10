@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채널 목록</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .channel-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .channel-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .channel-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .channel-info {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .unsubscribe-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            background-color: #28a745;
+            color: white;
+        }
+
+        .unsubscribe-badge.false {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="title">채널 목록</div>
+    <div id="channel-list" class="channel-grid"></div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("/v1/channel")
+            .then(response => response.json())
+            .then(data => {
+                const channels = data.data; // JSON 응답에서 "data" 키를 가져옴
+                const channelList = document.getElementById("channel-list");
+
+                channels.forEach(channel => {
+                    const channelCard = document.createElement("div");
+                    channelCard.classList.add("channel-card");
+
+                    channelCard.innerHTML = `
+                            <div class="channel-name">${channel.name}</div>
+                            <div class="channel-info">ID: ${channel.id}</div>
+                            <div class="channel-info">생성일: ${channel.createdDate}</div>
+                            <div class="unsubscribe-badge ${channel.canUnSubscribe ? 'true' : 'false'}">
+                                ${channel.canUnSubscribe ? "구독 해지 가능" : "구독 해지 불가"}
+                            </div>
+                        `;
+
+                    channelList.appendChild(channelCard);
+                });
+            })
+            .catch(error => console.error("데이터 로드 실패:", error));
+    });
+</script>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
 package com.altinus.subscription.domain.model;
 
+import com.altinus.common.domain.BaseEntity;
 import com.altinus.subscription.domain.model.enums.SubscriptionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "subscription_history")
-public class SubscriptionHistory {
+public class SubscriptionHistory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
