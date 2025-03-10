@@ -108,6 +108,7 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
                 .orElseThrow(() -> new ApiErrorException(ResultCode.NOT_FOUND));
 
         // 2. 구독 여부 확인
+        // 각각 구현체에서 구현
         log.info("[구독] 2. 구독 여부 확인");
         ValidateSubscriptionResponseDto validateSubscriptionResponseDto = validateSubscribe(
                 subscriptionCreateRequestDto.getPhoneNumber(),
@@ -115,7 +116,7 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
                 subscriptionCreateRequestDto.getStatus()
                 );
 
-        // 3. 구독
+        // 3. 구독 - validateSubscriptionResponseDto.getId() 로 JPA의 더티체킹
         Subscription newSubscription = new Subscription(
                 validateSubscriptionResponseDto.getId(),
                 validateSubscriptionResponseDto.getPhoneNumber(),
