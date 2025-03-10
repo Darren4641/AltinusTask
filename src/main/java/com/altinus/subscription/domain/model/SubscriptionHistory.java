@@ -24,7 +24,6 @@ public class SubscriptionHistory extends BaseEntity {
     private String phoneNumber; // 회원 ID 없이, 휴대폰 번호로 관리
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private SubscriptionStatus oldStatus;
 
     @Enumerated(EnumType.STRING)
@@ -35,7 +34,7 @@ public class SubscriptionHistory extends BaseEntity {
     private LocalDateTime changedAt;
 
     @Column(nullable = false)
-    private String channelName;
+    private String channelName; // 그 당시 구독 채널 이름을 저장 하기 위해 컬럼 추가
 
     public SubscriptionHistory(String phoneNumber, SubscriptionStatus oldStatus, SubscriptionStatus newStatus, String channelName) {
         this.phoneNumber = phoneNumber;

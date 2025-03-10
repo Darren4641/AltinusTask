@@ -1,7 +1,9 @@
 package com.altinus.subscription.application.converter;
 
 import com.altinus.subscription.application.dto.response.ChannelListResponseDto;
+import com.altinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
 import com.altinus.subscription.domain.model.Channel;
+import com.altinus.subscription.domain.model.enums.SubscriptionStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,4 +32,5 @@ public class ChannelConverter {
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
     }
+
 }

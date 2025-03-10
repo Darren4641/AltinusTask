@@ -23,8 +23,5 @@ spring:
     generate-ddl: true
 
 
-
-app:
-  auth:
-    tokenSecret: 9a1c7805bb074f31f9b36fa510d0c743a557aa44f9b5b1cd6dbb7f8905b067c8
-    tokenExpiry: 7776000000 #3month
+altinus:
+  external-api: https://csrng.net/csrng/csrng.php?min=0&max=1

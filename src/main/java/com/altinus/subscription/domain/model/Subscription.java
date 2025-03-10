@@ -35,6 +35,11 @@ public class Subscription extends BaseEntity {
         this.status = status;
     }
 
+    public void subscribeChannel(Channel channel) {
+        this.channel = channel;
+    }
+
+
     public void updateStatus(SubscriptionStatus newStatus) {
         this.status = newStatus;
     }
