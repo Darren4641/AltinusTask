@@ -117,9 +117,10 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
 
         // 3. 구독
         Subscription newSubscription = new Subscription(
+                validateSubscriptionResponseDto.getId(),
                 validateSubscriptionResponseDto.getPhoneNumber(),
-                validateSubscriptionResponseDto.getChannel(),
-                validateSubscriptionResponseDto.getNewStatus()
+                validateSubscriptionResponseDto.getNewStatus(),
+                validateSubscriptionResponseDto.getChannel()
         );
         subscriptionRepository.save(newSubscription);
         log.info("[구독] 3. 구독 {} => {}", validateSubscriptionResponseDto.getPhoneNumber(), validateSubscriptionResponseDto.getChannel().getName());

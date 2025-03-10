@@ -11,9 +11,11 @@ import com.artinus.subscription.domain.repository.SubscriptionDSLRepository;
 import com.artinus.subscription.domain.repository.SubscriptionHistoryRepository;
 import com.artinus.subscription.domain.repository.SubscriptionRepository;
 import com.artinus.subscription.infrastructure.external.service.CsrngExternalService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @Qualifier("premiumSubscriptionService")
 public class PremiumSubscriptionService extends AbstractSubscriptionService {
@@ -37,6 +39,15 @@ public class PremiumSubscriptionService extends AbstractSubscriptionService {
 
     @Override
     public ValidateSubscriptionResponseDto validateSubscribe(String phoneNumber, Channel channel, SubscriptionStatus newStatus) {
-        return null;
+        log.info("[Premium 구독]");
+        return subscriptionDSLRepository
+                .findByPhoneNumberAndChannelIdDSL(phoneNumber, channel.getId())
+                .map(subscription -> subscriptionConverter.toValidateResponseDto(
+                        subscription.getId(), phoneNumber, channel, subscription.getStatus(), newStatus)
+                )
+                .orElseGet(() -> subscriptionConverter.toValidateResponseDto(
+                        null, phoneNumber, channel, null, newStatus)
+                );
+
     }
 }

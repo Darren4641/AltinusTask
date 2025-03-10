@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Slf4j
-@Service
+@Service("basicSubscriptionService")
 @Primary
 public class BasicSubscriptionService extends AbstractSubscriptionService {
 
@@ -50,17 +50,7 @@ public class BasicSubscriptionService extends AbstractSubscriptionService {
      */
     @Override
     public ValidateSubscriptionResponseDto validateSubscribe(String phoneNumber, Channel channel, SubscriptionStatus newStatus) {
-        subscriptionDSLRepository
-                .findByPhoneNumberAndChannelIdAndStatusDSL(
-                        phoneNumber,
-                        channel.getId(),
-                        newStatus
-                )
-                .ifPresent(subscription -> {
-                    throw new ApiErrorException(ResultCode.ALREADY_REQUEST);
-                });
-
-
-        return subscriptionConverter.toValidateResponseDto(phoneNumber, channel, null, newStatus);
+        log.info("[Basic 구독]");
+        return subscriptionConverter.toValidateResponseDto(null, phoneNumber, channel, null, newStatus);
     }
 }

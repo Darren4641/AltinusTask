@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface SubscriptionDSLRepository {
     Optional<Subscription> findByPhoneNumberAndChannelIdAndStatusDSL(String phoneNumber, Long channelId, SubscriptionStatus status);
+
+    Optional<Subscription> findByPhoneNumberAndChannelIdDSL(String phoneNumber, Long channelId);
 }

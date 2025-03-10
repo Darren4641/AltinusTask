@@ -6,6 +6,7 @@ import com.artinus.common.exception.dto.FieldErrorDetail;
 import com.artinus.common.response.enums.ResultCode;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -29,6 +30,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionMsg> handleApiErrorException(ApiErrorException ex) {
         return new ResponseEntity<>(
                 new ExceptionMsg(ex.getResultCode().getMessage(), ex.getResultCode().getCode(), false, List.of()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ExceptionMsg> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        return new ResponseEntity<>(
+                new ExceptionMsg(ResultCode.SUBSCRIBE_UNIQUE.getMessage(), ResultCode.SUBSCRIBE_UNIQUE.getCode(), false, List.of()),
                 HttpStatus.BAD_REQUEST
         );
     }

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ValidateSubscriptionResponseDto {
+    private Long id;
     private String phoneNumber;
     private SubscriptionStatus oldStatus;
     private SubscriptionStatus newStatus;

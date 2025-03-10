@@ -14,12 +14,17 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class SubscriptionFacade {
     private final SubscriptionService subscriptionService;
-
-    @Qualifier("premiumSubscriptionService")
     private final SubscriptionService premiumSubscriptionService;
+    public SubscriptionFacade(
+            @Qualifier("basicSubscriptionService") SubscriptionService subscriptionService,
+            @Qualifier("premiumSubscriptionService") SubscriptionService premiumSubscriptionService
+    ) {
+        this.subscriptionService = subscriptionService;
+        this.premiumSubscriptionService = premiumSubscriptionService;
+    }
+    
 
     public List<ChannelListResponseDto> viewAllChannels() {
         return subscriptionService.findAllChannels();

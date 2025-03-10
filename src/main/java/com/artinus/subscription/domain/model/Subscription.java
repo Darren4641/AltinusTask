@@ -6,19 +6,31 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@DynamicUpdate
+@DynamicInsert
 @Entity
-@Table(name = "subscriptions")
+@Table(
+        name = "subscriptions",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "UK_phone_channel", columnNames = {"phoneNumber", "channel_id"})
+        },
+        indexes = {
+                @Index(name = "IDX_subscription_channel", columnList = "channel_id") // FK 인덱스 추가
+        }
+)
 public class Subscription extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String phoneNumber;  // 회원 ID 없이, 휴대폰 번호로 관리
 
     @Enumerated(EnumType.STRING)

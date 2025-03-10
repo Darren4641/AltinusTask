@@ -31,4 +31,14 @@ public class SubscriptionDSLRepositoryImpl implements SubscriptionDSLRepository 
                 .fetchOne());
     }
 
+    public Optional<Subscription> findByPhoneNumberAndChannelIdDSL(String phoneNumber, Long channelId) {
+        return Optional.ofNullable(queryFactory
+                .select(subscription)
+                .from(subscription)
+                .join(subscription.channel, channel)
+                .where(subscription.phoneNumber.eq(phoneNumber)
+                        .and(channel.id.eq(channelId)))
+                .fetchOne());
+    }
+
 }

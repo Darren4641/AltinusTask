@@ -15,8 +15,18 @@ import org.springframework.stereotype.Component;
 public class SubscriptionConverter {
 
 
-    public ValidateSubscriptionResponseDto toValidateResponseDto(String phoneNumber, Channel channel, SubscriptionStatus oldStatus, SubscriptionStatus newStatus) {
+    /**
+     *
+     * @param id JPA의 더티체킹을 통해 null -> 새로 생성
+     * @param phoneNumber
+     * @param channel
+     * @param oldStatus
+     * @param newStatus
+     * @return
+     */
+    public ValidateSubscriptionResponseDto toValidateResponseDto(Long id, String phoneNumber, Channel channel, SubscriptionStatus oldStatus, SubscriptionStatus newStatus) {
         return new ValidateSubscriptionResponseDto(
+                id,
                 phoneNumber,
                 oldStatus,
                 newStatus,
