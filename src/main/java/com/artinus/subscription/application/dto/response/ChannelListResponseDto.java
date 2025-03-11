@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class ChannelListResponseDto {
     private Long id;
     private String name;
+    private Boolean canSubscribe;
     private Boolean canUnSubscribe;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdDate;

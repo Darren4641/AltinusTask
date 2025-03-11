@@ -46,6 +46,10 @@
             transition: transform 0.2s ease-in-out;
         }
 
+        .channel-card div {
+            text-align: left;
+        }
+
         .channel-card:hover {
             transform: translateY(-5px);
         }
@@ -60,6 +64,11 @@
             font-size: 14px;
             color: #6c757d;
             margin-bottom: 8px;
+        }
+
+        .badge-parent {
+            display: flex;
+            gap: 5px;
         }
 
         .unsubscribe-badge {
@@ -97,12 +106,18 @@
                     channelCard.classList.add("channel-card");
 
                     channelCard.innerHTML = `
-                            <div class="channel-name">${channel.name}</div>
                             <div class="channel-info">ID: ${channel.id}</div>
+                            <div class="channel-name">${channel.name}</div>
                             <div class="channel-info">생성일: ${channel.createdDate}</div>
-                            <div class="unsubscribe-badge ${channel.canUnSubscribe ? 'true' : 'false'}">
-                                ${channel.canUnSubscribe ? "구독 해지 가능" : "구독 해지 불가"}
+                            <div class="badge-parent">
+                                <div class="unsubscribe-badge ${channel.canSubscribe ? 'true' : 'false'}">
+                                ${channel.canSubscribe ? "구독 가능" : "구독 불가"}
+                                </div>
+                                <div class="unsubscribe-badge ${channel.canUnSubscribe ? 'true' : 'false'}">
+                                    ${channel.canUnSubscribe ? "해지 가능" : "해지 불가"}
+                                </div>
                             </div>
+
                         `;
 
                     channelList.appendChild(channelCard);

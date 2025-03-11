@@ -14,6 +14,7 @@ public class ChannelConverter {
         return new ChannelListResponseDto(
                 channel.getId(),
                 channel.getName(),
+                channel.getCanSubscribe(),
                 channel.getCanUnSubscribe(),
                 channel.getCreatedDate()
         );
