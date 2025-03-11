@@ -1,13 +1,16 @@
 package com.artinus.subscription.application.converter;
 
 import com.artinus.subscription.application.dto.request.SubscriptionCreateRequestDto;
+import com.artinus.subscription.application.dto.request.SubscriptionDeleteRequestDto;
 import com.artinus.subscription.application.dto.response.SubscriptionResponseDto;
 import com.artinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
 import com.artinus.subscription.domain.model.Channel;
 import com.artinus.subscription.domain.model.Subscription;
 import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
 import com.artinus.subscription.ui.dto.request.SubscriptionCreateRequestApiDto;
+import com.artinus.subscription.ui.dto.request.SubscriptionDeleteRequestApiDto;
 import com.artinus.subscription.ui.dto.response.SubscriptionCreateResponseApiDto;
+import com.artinus.subscription.ui.dto.response.SubscriptionDeleteResponseApiDto;
 import org.springframework.stereotype.Component;
 
 
@@ -52,6 +55,22 @@ public class SubscriptionConverter {
 
     public SubscriptionCreateResponseApiDto toCreateResponseDto(SubscriptionResponseDto subscriptionResponseDto) {
         return new SubscriptionCreateResponseApiDto(
+                subscriptionResponseDto.getChannelId(),
+                subscriptionResponseDto.getChannelName(),
+                subscriptionResponseDto.getStatus()
+        );
+    }
+
+    public SubscriptionDeleteRequestDto toDeleteServiceDto(SubscriptionDeleteRequestApiDto subscriptionDeleteRequestApiDto) {
+        return new SubscriptionDeleteRequestDto(
+                subscriptionDeleteRequestApiDto.getPhoneNumber(),
+                subscriptionDeleteRequestApiDto.getChannelId(),
+                subscriptionDeleteRequestApiDto.getStatus()
+        );
+    }
+
+    public SubscriptionDeleteResponseApiDto toDeleteResponseDto(SubscriptionResponseDto subscriptionResponseDto) {
+        return new SubscriptionDeleteResponseApiDto(
                 subscriptionResponseDto.getChannelId(),
                 subscriptionResponseDto.getChannelName(),
                 subscriptionResponseDto.getStatus()

@@ -3,6 +3,7 @@ package com.artinus.subscription.application;
 import com.artinus.common.exception.ApiErrorException;
 import com.artinus.common.response.enums.ResultCode;
 import com.artinus.subscription.application.dto.request.SubscriptionCreateRequestDto;
+import com.artinus.subscription.application.dto.request.SubscriptionDeleteRequestDto;
 import com.artinus.subscription.application.dto.response.ChannelListResponseDto;
 import com.artinus.subscription.application.dto.response.SubscriptionResponseDto;
 import com.artinus.subscription.application.service.SubscriptionService;
@@ -34,6 +35,10 @@ public class SubscriptionFacade {
         SubscriptionService targetService = getSubscriptionService(subscriptionCreateRequestDto.getStatus());
 
         return targetService.subscribe(subscriptionCreateRequestDto);
+    }
+
+    public SubscriptionResponseDto unSubscribe(SubscriptionDeleteRequestDto subscriptionDeleteRequestDto) {
+        return null;
     }
 
     private SubscriptionService getSubscriptionService(SubscriptionStatus status) {
