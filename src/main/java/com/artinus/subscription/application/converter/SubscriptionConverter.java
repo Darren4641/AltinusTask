@@ -2,8 +2,10 @@ package com.artinus.subscription.application.converter;
 
 import com.artinus.subscription.application.dto.request.SubscriptionCreateRequestDto;
 import com.artinus.subscription.application.dto.request.SubscriptionDeleteRequestDto;
+import com.artinus.subscription.application.dto.response.SubscriptionDto;
 import com.artinus.subscription.application.dto.response.SubscriptionResponseDto;
 import com.artinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
+import com.artinus.subscription.application.dto.response.ValidateUnSubscriptionResponseDto;
 import com.artinus.subscription.domain.model.Channel;
 import com.artinus.subscription.domain.model.Subscription;
 import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
@@ -27,7 +29,7 @@ public class SubscriptionConverter {
      * @param newStatus
      * @return
      */
-    public ValidateSubscriptionResponseDto toValidateResponseDto(Long id, String phoneNumber, Channel channel, SubscriptionStatus oldStatus, SubscriptionStatus newStatus) {
+    public ValidateSubscriptionResponseDto toValidateSubResponseDto(Long id, String phoneNumber, Channel channel, SubscriptionStatus oldStatus, SubscriptionStatus newStatus) {
         return new ValidateSubscriptionResponseDto(
                 id,
                 phoneNumber,
@@ -37,11 +39,21 @@ public class SubscriptionConverter {
         );
     }
 
-    public SubscriptionResponseDto toSubscriptionResponseDto(Subscription newSubscription, Channel channel) {
+    public ValidateUnSubscriptionResponseDto toValidateUnSubResponseDto(Long id, String phoneNumber, Channel channel, SubscriptionStatus oldStatus, SubscriptionStatus newStatus) {
+        return new ValidateUnSubscriptionResponseDto(
+                id,
+                phoneNumber,
+                oldStatus,
+                newStatus,
+                channel
+        );
+    }
+
+    public SubscriptionResponseDto toSubscriptionResponseDto(Subscription subscriptionEntity, Channel channel) {
         return new SubscriptionResponseDto(
-                newSubscription.getId(),
+                subscriptionEntity.getId(),
                 channel.getName(),
-                newSubscription.getStatus()
+                subscriptionEntity.getStatus()
         );
     }
 

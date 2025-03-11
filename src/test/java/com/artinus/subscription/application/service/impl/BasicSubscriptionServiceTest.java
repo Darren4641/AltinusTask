@@ -1,8 +1,11 @@
 package com.artinus.subscription.application.service.impl;
 
 import com.artinus.subscription.application.converter.SubscriptionConverter;
+import com.artinus.subscription.application.dto.response.SubscriptionDto;
 import com.artinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
+import com.artinus.subscription.application.dto.response.ValidateUnSubscriptionResponseDto;
 import com.artinus.subscription.domain.model.Channel;
+import com.artinus.subscription.domain.model.Subscription;
 import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
 import com.artinus.subscription.domain.repository.ChannelRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +34,7 @@ class BasicSubscriptionServiceTest {
 
     @BeforeEach
     void setUp() {
-        testChannel = new Channel(1L, "Test Channel", true);
+        testChannel = new Channel(1L, "Test Channel", true, true);
         channelRepository.save(testChannel);
         testPhoneNumber = "01012345678";
     }
@@ -42,9 +45,9 @@ class BasicSubscriptionServiceTest {
         SubscriptionStatus status = SubscriptionStatus.SUBSCRIBE;
 
         ValidateSubscriptionResponseDto expectedResponse =
-                new ValidateSubscriptionResponseDto(null, testPhoneNumber, null, status, testChannel);
+                new ValidateSubscriptionResponseDto(null, testPhoneNumber, SubscriptionStatus.UNSUBSCRIBE, status, testChannel);
 
-        when(subscriptionConverter.toValidateResponseDto(null, testPhoneNumber, testChannel, null, status))
+        when(subscriptionConverter.toValidateSubResponseDto(null, testPhoneNumber, testChannel, SubscriptionStatus.UNSUBSCRIBE, status))
                 .thenReturn(expectedResponse);
 
         // When
@@ -56,4 +59,24 @@ class BasicSubscriptionServiceTest {
         assertThat(response.getNewStatus()).isEqualTo(status);
     }
 
+    @Test
+    void 일반_구독_해지() {
+        // Given
+        SubscriptionStatus status = SubscriptionStatus.UNSUBSCRIBE;
+        SubscriptionDto subscriptionDto = new SubscriptionDto(1L, testPhoneNumber, SubscriptionStatus.SUBSCRIBE, true);
+
+        ValidateUnSubscriptionResponseDto expectedResponse =
+                new ValidateUnSubscriptionResponseDto(subscriptionDto.getId(), testPhoneNumber, subscriptionDto.getStatus(), status, testChannel);
+
+        when(subscriptionConverter.toValidateUnSubResponseDto(subscriptionDto.getId(), testPhoneNumber, testChannel, subscriptionDto.getStatus(), status))
+                .thenReturn(expectedResponse);
+
+        // When
+        ValidateUnSubscriptionResponseDto response = basicSubscriptionService.validateUnSubscribe(testPhoneNumber, testChannel, status, subscriptionDto);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getPhoneNumber()).isEqualTo(testPhoneNumber);
+        assertThat(response.getNewStatus()).isEqualTo(status);
+    }
 }

@@ -20,10 +20,14 @@ public class Channel extends BaseEntity {
     private String name;
 
     @Column(nullable = false)
+    private Boolean canSubscribe;
+
+    @Column(nullable = false)
     private Boolean canUnSubscribe;
 
-    public Channel(String name, Boolean canUnSubscribe) {
+    public Channel(String name, Boolean canSubscribe, Boolean canUnSubscribe) {
         this.name = name;
+        this.canSubscribe = canSubscribe;
         this.canUnSubscribe = canUnSubscribe;
     }
 

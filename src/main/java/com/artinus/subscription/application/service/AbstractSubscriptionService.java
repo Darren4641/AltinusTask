@@ -6,12 +6,11 @@ import com.artinus.subscription.application.converter.ChannelConverter;
 import com.artinus.subscription.application.converter.SubscriptionConverter;
 import com.artinus.subscription.application.dto.request.SubscriptionCreateRequestDto;
 import com.artinus.subscription.application.dto.request.SubscriptionDeleteRequestDto;
-import com.artinus.subscription.application.dto.response.ChannelListResponseDto;
-import com.artinus.subscription.application.dto.response.SubscriptionResponseDto;
-import com.artinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
+import com.artinus.subscription.application.dto.response.*;
 import com.artinus.subscription.domain.model.Channel;
 import com.artinus.subscription.domain.model.Subscription;
 import com.artinus.subscription.domain.model.SubscriptionHistory;
+import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
 import com.artinus.subscription.domain.repository.ChannelRepository;
 import com.artinus.subscription.domain.repository.SubscriptionDSLRepository;
 import com.artinus.subscription.domain.repository.SubscriptionHistoryRepository;
@@ -46,23 +45,23 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
     @PostConstruct
     public void init() {
         // 구독, 해지 가능
-        saveChannelIfNot("홈페이지", true);
-        saveChannelIfNot("모바일앱", true);
+        saveChannelIfNot("홈페이지", true, true);
+        saveChannelIfNot("모바일앱", true, true);
 
         // 구독만 가능
-        saveChannelIfNot("네이버", false);
-        saveChannelIfNot("SKT", false);
-        saveChannelIfNot("KT", false);
-        saveChannelIfNot("LGU+", false);
+        saveChannelIfNot("네이버", true, false);
+        saveChannelIfNot("SKT", true, false);
+        saveChannelIfNot("KT", true, false);
+        saveChannelIfNot("LGU+", true, false);
 
         // 해지만 가능
-        saveChannelIfNot("콜센터", true);
-        saveChannelIfNot("채팅상담", true);
-        saveChannelIfNot("이메일", true);
+        saveChannelIfNot("콜센터", false, true);
+        saveChannelIfNot("채팅상담", false, true);
+        saveChannelIfNot("이메일", false, true);
     }
 
     /**
-     * 채널의 목록을 보여주는 API
+     * 채널의 목록을 보여주는 로직
      * 공통 메서드이기에 해당 클래스에서 구현
      *
      * @return List<ChannelListResponseDto>
@@ -93,7 +92,7 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
     }
 
     /**
-     * 구독하기 API
+     * 구독하기 로직
      *
      * @param subscriptionCreateRequestDto
      * @return SubscriptionResponseDto
@@ -107,6 +106,10 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
         Channel channelEntity = channelRepository.findById(subscriptionCreateRequestDto.getChannelId())
                 .orElseThrow(() -> new ApiErrorException(ResultCode.NOT_FOUND));
 
+        if(!channelEntity.getCanSubscribe()) {
+            throw new ApiErrorException(ResultCode.DISABLED_SUBSCRIBE);
+        }
+
         // 2. 구독 여부 확인
         // 각각 구현체에서 구현
         log.info("[구독] 2. 구독 여부 확인");
@@ -117,13 +120,13 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
                 );
 
         // 3. 구독 - validateSubscriptionResponseDto.getId() 로 JPA의 더티체킹
-        Subscription newSubscription = new Subscription(
+        Subscription subscriptionEntity = new Subscription(
                 validateSubscriptionResponseDto.getId(),
                 validateSubscriptionResponseDto.getPhoneNumber(),
                 validateSubscriptionResponseDto.getNewStatus(),
                 validateSubscriptionResponseDto.getChannel()
         );
-        subscriptionRepository.save(newSubscription);
+        subscriptionRepository.save(subscriptionEntity);
         log.info("[구독] 3. 구독 {} => {}", validateSubscriptionResponseDto.getPhoneNumber(), validateSubscriptionResponseDto.getChannel().getName());
 
         // 4. 구독 내역 저장
@@ -139,24 +142,88 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
         // 5. 외부 API 호출
         callAltinusSubscribe();
         log.info("[구독 완료]");
-        return subscriptionConverter.toSubscriptionResponseDto(newSubscription, channelEntity);
+        return subscriptionConverter.toSubscriptionResponseDto(subscriptionEntity, channelEntity);
     }
 
     /**
-     * 구독 취소하기 API
+     * 구독 취소하기 로직
      *
      * @param subscriptionDeleteRequestDto
+     * @return
      */
     @Override
     @Transactional
-    public void unSubscription(SubscriptionDeleteRequestDto subscriptionDeleteRequestDto) {
+    public SubscriptionResponseDto unSubscribe(SubscriptionDeleteRequestDto subscriptionDeleteRequestDto, SubscriptionDto subscriptionDto) {
+        log.info("[구독 해지 시작]");
+        log.info("[구독 해지] 1. 채널 DB 데이터 조회 {} => {}", subscriptionDeleteRequestDto.getPhoneNumber(), subscriptionDeleteRequestDto.getChannelId());
+        Channel channelEntity = channelRepository.findById(subscriptionDeleteRequestDto.getChannelId())
+                .orElseThrow(() -> new ApiErrorException(ResultCode.NOT_FOUND));
+
+        if(!channelEntity.getCanUnSubscribe()) {
+            throw new ApiErrorException(ResultCode.DISABLED_UNSUBSCRIBE);
+        }
+
+        /*
+        * 만약 프리미엄 구독 -> 일반 구독 은 가능한다그러면 아래 코드로 예외처리 변경
+        if(!channelEntity.getCanUnSubscribe() &&
+          subscriptionDeleteRequestDto.getStatus() == SubscriptionStatus.UNSUBSCRIBE) {
+            throw new ApiErrorException(ResultCode.DISABLED_UNSUBSCRIBE);
+        }*/
+
+        // 2. 구독 해지 여부 확인
+        // 각각 구현체에서 구현
+        log.info("[구독 해지] 2. 구독 해지 여부 확인");
+        ValidateUnSubscriptionResponseDto validateUnSubscriptionResponseDto = validateUnSubscribe(
+                subscriptionDeleteRequestDto.getPhoneNumber(),
+                channelEntity,
+                subscriptionDeleteRequestDto.getStatus(),
+                subscriptionDto
+        );
+
+        Subscription subscriptionEntity = new Subscription(
+                validateUnSubscriptionResponseDto.getId(),
+                validateUnSubscriptionResponseDto.getPhoneNumber(),
+                validateUnSubscriptionResponseDto.getNewStatus(),
+                validateUnSubscriptionResponseDto.getChannel()
+        );
+
+        if(validateUnSubscriptionResponseDto.getNewStatus() == SubscriptionStatus.UNSUBSCRIBE) {
+            subscriptionRepository.deleteById(subscriptionEntity.getId());
+        } else {
+            subscriptionRepository.save(subscriptionEntity);
+        }
+        log.info("[구독 해지] 3. 구독 {} => {}", validateUnSubscriptionResponseDto.getPhoneNumber(), validateUnSubscriptionResponseDto.getChannel().getName());
+
+        // 4. 구독 내역 저장
+        SubscriptionHistory newSubscriptionHistory = new SubscriptionHistory(
+                validateUnSubscriptionResponseDto.getPhoneNumber(),
+                validateUnSubscriptionResponseDto.getOldStatus(),
+                validateUnSubscriptionResponseDto.getNewStatus(),
+                validateUnSubscriptionResponseDto.getChannel().getName()
+        );
+        subscriptionHistoryRepository.save(newSubscriptionHistory);
+        log.info("[구독] 4. 구독 이력 {} => {}", validateUnSubscriptionResponseDto.getOldStatus(), validateUnSubscriptionResponseDto.getNewStatus());
+
         // 외부 API 호출
         callAltinusSubscribe();
+        log.info("[구독 해지 완료]");
+        return subscriptionConverter.toSubscriptionResponseDto(subscriptionEntity, channelEntity);
+    }
+
+    /**
+     * 구독 상태 가져오기 로직
+     * @param phoneNumber
+     * @return
+     */
+    @Override
+    public SubscriptionDto getSubscription(String phoneNumber, Long channelId) {
+        return subscriptionDSLRepository.findSubscriptionDSL(phoneNumber, channelId)
+                .orElse(new SubscriptionDto(SubscriptionStatus.UNSUBSCRIBE));
     }
 
 
-    private void saveChannelIfNot(String name, Boolean type) {
+    private void saveChannelIfNot(String name, Boolean canSubscribe, Boolean canUnSubscribe) {
         channelRepository.findByName(name)
-                .orElseGet(() -> channelRepository.save(new Channel(name, type)));
+                .orElseGet(() -> channelRepository.save(new Channel(name, canSubscribe, canUnSubscribe)));
     }
 }

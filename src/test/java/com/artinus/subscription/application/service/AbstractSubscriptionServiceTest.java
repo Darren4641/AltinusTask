@@ -2,8 +2,11 @@ package com.artinus.subscription.application.service;
 
 import com.artinus.subscription.application.converter.SubscriptionConverter;
 import com.artinus.subscription.application.dto.request.SubscriptionCreateRequestDto;
+import com.artinus.subscription.application.dto.request.SubscriptionDeleteRequestDto;
+import com.artinus.subscription.application.dto.response.SubscriptionDto;
 import com.artinus.subscription.application.dto.response.SubscriptionResponseDto;
 import com.artinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
+import com.artinus.subscription.application.dto.response.ValidateUnSubscriptionResponseDto;
 import com.artinus.subscription.application.service.impl.BasicSubscriptionService;
 import com.artinus.subscription.application.service.impl.PremiumSubscriptionService;
 import com.artinus.subscription.domain.model.Channel;
@@ -60,7 +63,7 @@ class AbstractSubscriptionServiceTest {
 
     @BeforeEach
     void setUp() {
-        testChannel = new Channel(1L, "Test Channel", true);
+        testChannel = new Channel(1L, "Test Channel", true, true);
         channelRepository.save(testChannel);
         testPhoneNumber = "01012345678";
     }
@@ -77,7 +80,7 @@ class AbstractSubscriptionServiceTest {
         // 2. 구독 여부 확인 (validateSubscribe 결과)
         ValidateSubscriptionResponseDto validateResponse =
                 new ValidateSubscriptionResponseDto(null, testPhoneNumber, null, SubscriptionStatus.SUBSCRIBE, testChannel);
-        when(subscriptionConverter.toValidateResponseDto(null, testPhoneNumber, testChannel, null, SubscriptionStatus.SUBSCRIBE))
+        when(subscriptionConverter.toValidateSubResponseDto(null, testPhoneNumber, testChannel, SubscriptionStatus.UNSUBSCRIBE, SubscriptionStatus.SUBSCRIBE))
                 .thenReturn(validateResponse);
 
         // 5. 외부 API 호출 (강제 1 주입)
@@ -138,7 +141,7 @@ class AbstractSubscriptionServiceTest {
         when(csrngExternalService.fetchRandomData())
                 .thenReturn(List.of(new CsrngResponseDto("success", 0, 1, 1)));
 
-        when(subscriptionConverter.toValidateResponseDto(
+        when(subscriptionConverter.toValidateSubResponseDto(
                 existingSubscription.getId(), testPhoneNumber, testChannel, existingStatus, newStatus))
                 .thenReturn(validateResponse);
 
@@ -189,7 +192,7 @@ class AbstractSubscriptionServiceTest {
         // Given 2. 구독 여부 확인 스텁 (validateSubscribe 결과)
         ValidateSubscriptionResponseDto validateResponse =
                 new ValidateSubscriptionResponseDto(null, testPhoneNumber, null, SubscriptionStatus.SUBSCRIBE, testChannel);
-        when(subscriptionConverter.toValidateResponseDto(null, testPhoneNumber, testChannel, null, SubscriptionStatus.SUBSCRIBE))
+        when(subscriptionConverter.toValidateSubResponseDto(null, testPhoneNumber, testChannel, SubscriptionStatus.UNSUBSCRIBE, SubscriptionStatus.SUBSCRIBE))
                 .thenReturn(validateResponse);
 
         // Given 3. 구독 중복 저장 시 `DataIntegrityViolationException` 발생하도록 설정
@@ -204,6 +207,55 @@ class AbstractSubscriptionServiceTest {
         // Verify: 중복 저장 시 예외 발생 후, 추가 작업이 실행되지 않음
         verify(subscriptionRepository, times(1)).save(any(Subscription.class));
         verify(subscriptionHistoryRepository, times(0)).save(any(SubscriptionHistory.class));
+    }
+
+    @Test
+    void 구독_해지_성공() {
+        // Given: Request DTO 생성
+        SubscriptionDeleteRequestDto testRequestDto = new SubscriptionDeleteRequestDto(testPhoneNumber, testChannel.getId(), SubscriptionStatus.UNSUBSCRIBE);
+        SubscriptionDto subscriptionDto = new SubscriptionDto(1L, testPhoneNumber, SubscriptionStatus.SUBSCRIBE, true);
+        // 1. 채널 DB 조회
+        when(channelRepository.findById(testRequestDto.getChannelId()))
+                .thenReturn(Optional.of(testChannel));
+
+        // 2. 구독 여부 확인 (validateSubscribe 결과)
+        ValidateUnSubscriptionResponseDto validateResponse =
+                new ValidateUnSubscriptionResponseDto(testRequestDto.getChannelId(), testPhoneNumber, subscriptionDto.getStatus(), SubscriptionStatus.SUBSCRIBE, testChannel);
+        when(subscriptionConverter.toValidateUnSubResponseDto(testRequestDto.getChannelId(), testPhoneNumber, testChannel, subscriptionDto.getStatus(), SubscriptionStatus.UNSUBSCRIBE))
+                .thenReturn(validateResponse);
+
+        // 5. 외부 API 호출 (강제 1 주입)
+        when(csrngExternalService.fetchRandomData())
+                .thenReturn(List.of(new CsrngResponseDto("success", 0, 1, 1)));
+
+        // Repository의 save() 메서드는 호출 시 전달된 인자를 그대로 반환
+        when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(subscriptionHistoryRepository.save(any(SubscriptionHistory.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // 6. 최종 응답 변환 스텁
+        SubscriptionResponseDto expectedResponse = new SubscriptionResponseDto(
+                testChannel.getId(),
+                testChannel.getName(),
+                SubscriptionStatus.UNSUBSCRIBE
+        );
+        when(subscriptionConverter.toSubscriptionResponseDto(any(Subscription.class), eq(testChannel)))
+                .thenReturn(expectedResponse);
+
+        // When: 구독 메서드 호출
+        SubscriptionResponseDto response = basicSubscriptionService.unSubscribe(testRequestDto, subscriptionDto);
+
+        // Then: 응답 검증
+        assertThat(response).isNotNull();
+        assertThat(response.getChannelId()).isEqualTo(testRequestDto.getChannelId());
+        assertThat(response.getChannelName()).isEqualTo(testChannel.getName());
+        assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.UNSUBSCRIBE);
+
+        // 추가: 각 저장 메서드의 호출 여부 검증
+        verify(channelRepository, times(1)).findById(testRequestDto.getChannelId());
+        verify(subscriptionRepository, times(1)).save(any(Subscription.class));
+        verify(subscriptionHistoryRepository, times(1)).save(any(SubscriptionHistory.class));
+        verify(csrngExternalService, times(1)).fetchRandomData();
+        verify(subscriptionConverter, times(1)).toSubscriptionResponseDto(any(Subscription.class), eq(testChannel));
     }
 
 }

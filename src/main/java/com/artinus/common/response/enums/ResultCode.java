@@ -13,6 +13,8 @@ public enum ResultCode {
     ALREADY_REQUEST("D-05", "이미 처리된 요청입니다."),
     CSRNG_ROLL_BACK("D-06", "[csrng.net] ROLL BACK 요청"),
     SUBSCRIBE_UNIQUE("D-07", "이미 구독이 되어있습니다."),
+    DISABLED_SUBSCRIBE("D-08", "현재 구독이 불가능한 채널입니다."),
+    DISABLED_UNSUBSCRIBE("D-09", "현재 구독 해지가 불가능한 채널입니다."),
     ILLEGAL_TOKEN_ERROR("D-995", "토큰이 만료되었습니다."),
     UNSUPPORTED_TOKEN_ERROR("D-996", "토큰이 만료되었습니다."),
     EXPIRED_TOKEN_ERROR("D-997", "토큰이 만료되었습니다."),

@@ -1,8 +1,10 @@
 package com.artinus.subscription.infrastructure.repository;
 
+import com.artinus.subscription.application.dto.response.SubscriptionDto;
 import com.artinus.subscription.domain.model.Subscription;
 import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
 import com.artinus.subscription.domain.repository.SubscriptionDSLRepository;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
@@ -34,6 +36,23 @@ public class SubscriptionDSLRepositoryImpl implements SubscriptionDSLRepository 
     public Optional<Subscription> findByPhoneNumberAndChannelIdDSL(String phoneNumber, Long channelId) {
         return Optional.ofNullable(queryFactory
                 .select(subscription)
+                .from(subscription)
+                .join(subscription.channel, channel)
+                .where(subscription.phoneNumber.eq(phoneNumber)
+                        .and(channel.id.eq(channelId)))
+                .fetchOne());
+    }
+
+    @Override
+    public Optional<SubscriptionDto> findSubscriptionDSL(String phoneNumber, Long channelId) {
+        return Optional.ofNullable(queryFactory
+                .select(Projections.constructor(
+                        SubscriptionDto.class,
+                        subscription.id,
+                        subscription.phoneNumber,
+                        subscription.status,
+                        channel.canUnSubscribe
+                ))
                 .from(subscription)
                 .join(subscription.channel, channel)
                 .where(subscription.phoneNumber.eq(phoneNumber)

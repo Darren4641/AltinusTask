@@ -1,7 +1,9 @@
 package com.artinus.subscription.application.service.impl;
 
 import com.artinus.subscription.application.converter.SubscriptionConverter;
+import com.artinus.subscription.application.dto.response.SubscriptionDto;
 import com.artinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
+import com.artinus.subscription.application.dto.response.ValidateUnSubscriptionResponseDto;
 import com.artinus.subscription.domain.model.Channel;
 import com.artinus.subscription.domain.model.Subscription;
 import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
@@ -38,7 +40,7 @@ class PremiumSubscriptionServiceTest {
 
     @BeforeEach
     void setUp() {
-        testChannel = new Channel(1L, "Test Channel", true);
+        testChannel = new Channel(1L, "Test Channel", true, true);
         channelRepository.save(testChannel);
         testPhoneNumber = "01012345678";
     }
@@ -54,9 +56,9 @@ class PremiumSubscriptionServiceTest {
 
         // Given 2. 신규 구독 변환
         ValidateSubscriptionResponseDto expectedResponse =
-                new ValidateSubscriptionResponseDto(null, testPhoneNumber, null, status, testChannel);
+                new ValidateSubscriptionResponseDto(null, testPhoneNumber, SubscriptionStatus.UNSUBSCRIBE, status, testChannel);
 
-        when(subscriptionConverter.toValidateResponseDto(null, testPhoneNumber, testChannel, null, status))
+        when(subscriptionConverter.toValidateSubResponseDto(null, testPhoneNumber, testChannel, SubscriptionStatus.UNSUBSCRIBE, status))
                 .thenReturn(expectedResponse);
 
         // When
@@ -84,7 +86,7 @@ class PremiumSubscriptionServiceTest {
         ValidateSubscriptionResponseDto expectedResponse =
                 new ValidateSubscriptionResponseDto(existingSubscription.getId(), testPhoneNumber, existingStatus, newStatus, testChannel);
 
-        when(subscriptionConverter.toValidateResponseDto(
+        when(subscriptionConverter.toValidateSubResponseDto(
                 existingSubscription.getId(), testPhoneNumber, testChannel, existingStatus, newStatus))
                 .thenReturn(expectedResponse);
 
@@ -97,5 +99,28 @@ class PremiumSubscriptionServiceTest {
         assertThat(response.getPhoneNumber()).isEqualTo(testPhoneNumber);
         assertThat(response.getOldStatus()).isEqualTo(existingStatus);
         assertThat(response.getNewStatus()).isEqualTo(newStatus);
+    }
+
+    @Test
+    void 프리미엄_구독_해지() {
+        // Given
+        SubscriptionStatus status = SubscriptionStatus.SUBSCRIBE;
+        SubscriptionDto subscriptionDto = new SubscriptionDto(1L, testPhoneNumber, SubscriptionStatus.PREMIUM_SUBSCRIBE, true);
+
+        // Given 2. 신규 구독 변환
+        ValidateUnSubscriptionResponseDto expectedResponse =
+                new ValidateUnSubscriptionResponseDto(subscriptionDto.getId(), testPhoneNumber, subscriptionDto.getStatus(), status, testChannel);
+
+        when(subscriptionConverter.toValidateUnSubResponseDto(subscriptionDto.getId(), testPhoneNumber, testChannel, subscriptionDto.getStatus(), status))
+                .thenReturn(expectedResponse);
+
+        // When
+        ValidateUnSubscriptionResponseDto response = premiumSubscriptionService.validateUnSubscribe(testPhoneNumber, testChannel, status, subscriptionDto);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getPhoneNumber()).isEqualTo(testPhoneNumber);
+        assertThat(response.getNewStatus()).isEqualTo(status);
     }
 }
