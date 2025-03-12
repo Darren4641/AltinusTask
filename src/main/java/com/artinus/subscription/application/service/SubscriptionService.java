@@ -5,8 +5,11 @@ import com.artinus.subscription.application.dto.request.SubscriptionDeleteReques
 import com.artinus.subscription.application.dto.response.*;
 import com.artinus.subscription.domain.model.Channel;
 import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Map;
 
 public interface SubscriptionService {
     List<ChannelListResponseDto> findAllChannels();
@@ -17,9 +20,12 @@ public interface SubscriptionService {
 
     SubscriptionDto getSubscription(String phoneNumber, Long channelId);
 
-
     ValidateSubscriptionResponseDto validateSubscribe(String phoneNumber, Channel channel, SubscriptionStatus newStatus);
 
     ValidateUnSubscriptionResponseDto validateUnSubscribe(String phoneNumber, Channel channel, SubscriptionStatus newStatus, SubscriptionDto subscriptionDto);
+
+    Map<SubscriptionStatus, List<SubscriptionDetailResponseDto>> getMySubscriptions(String phoneNumber);
+
+    Page<SubscriptionHistoryDto> getMySubscriptionHistories(String phoneNumber, Pageable pageable);
 
 }

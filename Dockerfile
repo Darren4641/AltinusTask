@@ -15,6 +15,6 @@ ENV SPRING_PROFILES_ACTIVE=prod
 # JAR 파일을 실행합니다.
 ENTRYPOINT ["java", "-Xms512m", "-Xmx768m", "-XX:+UseG1GC", "-jar", "app.jar"]
 
-## docker build --platform linux/amd64 -t zxz4641/altinustask:darren-0.0.2 .
-## docker run -d -p 8087:8080 zxz4641/altinustask:darren-0.0.2
+## docker build --platform linux/amd64 -t zxz4641/altinustask:darren-0.0.3 .
+## docker run -d -p 8087:8080 zxz4641/altinustask:darren-0.0.3
 

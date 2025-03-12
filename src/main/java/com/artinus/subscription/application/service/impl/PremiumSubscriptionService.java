@@ -4,6 +4,7 @@ import com.artinus.common.exception.ApiErrorException;
 import com.artinus.common.response.enums.ResultCode;
 import com.artinus.subscription.application.converter.ChannelConverter;
 import com.artinus.subscription.application.converter.SubscriptionConverter;
+import com.artinus.subscription.application.converter.SubscriptionHistoryConverter;
 import com.artinus.subscription.application.dto.response.SubscriptionDto;
 import com.artinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
 import com.artinus.subscription.application.dto.response.ValidateUnSubscriptionResponseDto;
@@ -30,6 +31,7 @@ public class PremiumSubscriptionService extends AbstractSubscriptionService {
                                       SubscriptionDSLRepository subscriptionDSLRepository,
                                       ChannelConverter channelConverter,
                                       SubscriptionConverter subscriptionConverter,
+                                      SubscriptionHistoryConverter subscriptionHistoryConverter,
                                       CsrngExternalService csrngExternalService) {
         super(  channelRepository,
                 subscriptionRepository,
@@ -37,6 +39,7 @@ public class PremiumSubscriptionService extends AbstractSubscriptionService {
                 subscriptionDSLRepository,
                 channelConverter,
                 subscriptionConverter,
+                subscriptionHistoryConverter,
                 csrngExternalService
         );
     }

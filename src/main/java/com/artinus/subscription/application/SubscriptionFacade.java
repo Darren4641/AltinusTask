@@ -4,15 +4,17 @@ import com.artinus.common.exception.ApiErrorException;
 import com.artinus.common.response.enums.ResultCode;
 import com.artinus.subscription.application.dto.request.SubscriptionCreateRequestDto;
 import com.artinus.subscription.application.dto.request.SubscriptionDeleteRequestDto;
-import com.artinus.subscription.application.dto.response.ChannelListResponseDto;
-import com.artinus.subscription.application.dto.response.SubscriptionDto;
-import com.artinus.subscription.application.dto.response.SubscriptionResponseDto;
+import com.artinus.subscription.application.dto.response.*;
 import com.artinus.subscription.application.service.SubscriptionService;
+import com.artinus.subscription.domain.model.SubscriptionHistory;
 import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SubscriptionFacade {
@@ -63,6 +65,16 @@ public class SubscriptionFacade {
 
         return targetService.unSubscribe(subscriptionDeleteRequestDto, subscriptionDto);
     }
+
+    public Map<SubscriptionStatus, List<SubscriptionDetailResponseDto>>  getMySubscriptions(String phoneNumber) {
+        return subscriptionService.getMySubscriptions(phoneNumber);
+    }
+
+    public Page<SubscriptionHistoryDto> getMySubscriptionHistories(String phoneNumber, Pageable pageable) {
+        return subscriptionService.getMySubscriptionHistories(phoneNumber, pageable);
+    }
+
+
 
     private SubscriptionService getSubscriptionService(SubscriptionStatus status) {
         return switch (status) {

@@ -8,12 +8,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SubscriptionDto {
+public class SubscriptionDetailResponseDto {
     private Long id;
-    private String phoneNumber;
+    private Long channelId;
+    private String channelName;
     private SubscriptionStatus status;
     private Boolean canUnSubscribe;
-    public SubscriptionDto(SubscriptionStatus status) {
-        this.status = status;
-    }
 }

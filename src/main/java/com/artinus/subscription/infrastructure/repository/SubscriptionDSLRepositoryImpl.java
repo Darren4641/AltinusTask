@@ -1,18 +1,28 @@
 package com.artinus.subscription.infrastructure.repository;
 
+import com.artinus.subscription.application.dto.response.SubscriptionDetailResponseDto;
 import com.artinus.subscription.application.dto.response.SubscriptionDto;
+import com.artinus.subscription.application.dto.response.SubscriptionHistoryDto;
 import com.artinus.subscription.domain.model.Subscription;
 import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
 import com.artinus.subscription.domain.repository.SubscriptionDSLRepository;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.artinus.subscription.domain.model.QChannel.channel;
 import static com.artinus.subscription.domain.model.QSubscription.subscription;
+import static com.artinus.subscription.domain.model.QSubscriptionHistory.subscriptionHistory;
 
 @Repository
 public class SubscriptionDSLRepositoryImpl implements SubscriptionDSLRepository {
@@ -58,6 +68,57 @@ public class SubscriptionDSLRepositoryImpl implements SubscriptionDSLRepository 
                 .where(subscription.phoneNumber.eq(phoneNumber)
                         .and(channel.id.eq(channelId)))
                 .fetchOne());
+    }
+
+    public Map<SubscriptionStatus, List<SubscriptionDetailResponseDto>> findSubscriptionsDetailByPhoneNumberDSL(String phoneNumber) {
+        List<Tuple> result = queryFactory
+                .select(
+                        subscription.id,
+                        channel.id,
+                        channel.name,
+                        subscription.status,
+                        channel.canUnSubscribe
+                )
+                .from(subscription)
+                .join(subscription.channel, channel)
+                .where(subscription.phoneNumber.eq(phoneNumber))
+                .fetch();
+
+        return result.stream()
+                .map(it -> new SubscriptionDetailResponseDto(
+                        it.get(subscription.id),
+                        it.get(channel.id),
+                        it.get(channel.name),
+                        it.get(subscription.status),
+                        it.get(channel.canUnSubscribe)
+                ))
+                .collect(Collectors.groupingBy(SubscriptionDetailResponseDto::getStatus));
+    }
+
+    @Override
+    public Page<SubscriptionHistoryDto> findSubscriptionHistories(String phoneNumber, Pageable pageable) {
+        List<SubscriptionHistoryDto> results = queryFactory
+                .select(Projections.constructor(
+                        SubscriptionHistoryDto.class,
+                        subscriptionHistory.id,
+                        subscriptionHistory.channelName,
+                        subscriptionHistory.oldStatus,
+                        subscriptionHistory.newStatus,
+                        subscriptionHistory.updatedDate
+                ))
+                .from(subscriptionHistory)
+                .where(subscriptionHistory.phoneNumber.eq(phoneNumber))
+                .orderBy(subscriptionHistory.updatedDate.desc())
+                .offset(pageable.getOffset())  // 페이징 적용
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long total = queryFactory
+                .select(subscriptionHistory.id.count())
+                .from(subscriptionHistory)
+                .fetchOne();
+
+        return new PageImpl<>(results, pageable, total != null ? total : 0L);
     }
 
 }

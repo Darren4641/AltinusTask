@@ -4,6 +4,7 @@ import com.artinus.common.exception.ApiErrorException;
 import com.artinus.common.response.enums.ResultCode;
 import com.artinus.subscription.application.converter.ChannelConverter;
 import com.artinus.subscription.application.converter.SubscriptionConverter;
+import com.artinus.subscription.application.converter.SubscriptionHistoryConverter;
 import com.artinus.subscription.application.dto.request.SubscriptionCreateRequestDto;
 import com.artinus.subscription.application.dto.request.SubscriptionDeleteRequestDto;
 import com.artinus.subscription.application.dto.response.*;
@@ -20,10 +21,13 @@ import com.artinus.subscription.infrastructure.external.service.CsrngExternalSer
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -36,6 +40,7 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
     protected final SubscriptionDSLRepository subscriptionDSLRepository;
     protected final ChannelConverter channelConverter;
     protected final SubscriptionConverter subscriptionConverter;
+    protected final SubscriptionHistoryConverter subscriptionHistoryConverter;
     protected final CsrngExternalService csrngExternalService;
 
     /**
@@ -219,6 +224,16 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
     public SubscriptionDto getSubscription(String phoneNumber, Long channelId) {
         return subscriptionDSLRepository.findSubscriptionDSL(phoneNumber, channelId)
                 .orElse(new SubscriptionDto(SubscriptionStatus.UNSUBSCRIBE));
+    }
+
+    @Override
+    public Map<SubscriptionStatus, List<SubscriptionDetailResponseDto>> getMySubscriptions(String phoneNumber) {
+        return subscriptionDSLRepository.findSubscriptionsDetailByPhoneNumberDSL(phoneNumber);
+    }
+
+    @Override
+    public Page<SubscriptionHistoryDto> getMySubscriptionHistories(String phoneNumber, Pageable pageable) {
+        return subscriptionDSLRepository.findSubscriptionHistories(phoneNumber, pageable);
     }
 
 

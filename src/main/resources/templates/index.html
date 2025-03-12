@@ -127,6 +127,8 @@
             border-radius: 10px;
             width: 350px;
             text-align: center;
+            overflow-y: auto;
+            max-height: 600px;
         }
 
         .modal input {
@@ -174,6 +176,9 @@
         .subscription-list {
             padding: 20px;
         }
+        .unsubscribe-btn {
+            cursor: pointer;
+        }
         .error-message {
             color: red;
             font-size: 14px;
@@ -217,6 +222,8 @@
             <button style="flex:1; height: 38px; border-radius: 5px; border: none; background-color: #28a745; color: white;" id="fetch-my-subscriptions">조회</button>
         </div>
 
+        <div id="my-error-message" class="error-message"></div>
+
         <div id="subscriptions-container">
             <h4 style="text-align: left;">일반 구독</h4>
             <hr>
@@ -229,12 +236,17 @@
             <div id="premium-subscriptions" class="subscription-list">
                 데이터가 없습니다.
             </div>
+            <h4 style="text-align: left;">구독 히스토리</h4>
+            <hr>
+            <div id="subscription-history" class="subscription-list"></div>
         </div>
     </div>
 </div>
 
 
 <script>
+    let currentPage = 0;
+    let loadMoreButton = null;
     document.addEventListener("DOMContentLoaded", function () {
         const modal = document.getElementById("subscribe-modal");
         const mySubModal = document.getElementById("my-sub-modal");
@@ -246,6 +258,7 @@
         const closeModalButton = document.getElementById("close-modal");
         const mySubModalCloseButton = document.getElementById("close-my-sub-modal");
         const mySubButton = document.getElementById("my-subscriptions");
+        const fetchMySubButton = document.getElementById("fetch-my-subscriptions");
         let selectedChannelId = null;
 
         // 채널 목록 가져오기
@@ -327,6 +340,18 @@
 
         mySubButton.addEventListener("click", () => {
             mySubModal.style.display = "flex"
+            currentPage = 0;
+            loadMoreButton = null;
+            const normalSubContainer = document.getElementById("normal-subscriptions");
+            const premiumSubContainer = document.getElementById("premium-subscriptions");
+            const historySubContainer = document.getElementById("subscription-history");
+            normalSubContainer.textContent = "데이터가 없습니다.";
+            premiumSubContainer.textContent = "데이터가 없습니다.";
+            historySubContainer.textContent = "";
+        });
+
+        fetchMySubButton.addEventListener("click", () => {
+            fetchMySubscriptions();
         });
 
         // 모달 닫기 버튼
@@ -337,7 +362,8 @@
         mySubModalCloseButton.addEventListener("click", () => {
             mySubModal.style.display = "none";
             myPhoneNumberInput.value = "";
-            document.getElementById("error-message").style.display = "none"; // 에러 메시지 숨김
+            document.getElementById("my-error-message").style.display = "none"; // 에러 메시지 숨김
+            document.getElementById("my-error-message").value = "";
         });
         function showErrorMessage(message) {
             const errorMessageDiv = document.getElementById("error-message");
@@ -349,7 +375,271 @@
             modal.style.display = "none";
             phoneNumberInput.value = "";
             document.getElementById("error-message").style.display = "none"; // 에러 메시지 숨김
+            document.getElementById("error-message").value = "";
         }
+
+        // 내 구독 조회 API 호출
+        function fetchMySubscriptions() {
+            const phoneNumber = myPhoneNumberInput.value.trim();
+            if (!phoneNumber) {
+                alert("휴대폰 번호를 입력해주세요.");
+                return;
+            }
+
+            document.getElementById("normal-subscriptions").innerHTML = "데이터가 없습니다.";
+            document.getElementById("premium-subscriptions").innerHTML = "데이터가 없습니다.";
+            document.getElementById("subscription-history").innerHTML = "";
+            currentPage = 0;
+            loadMoreButton = null;
+            document.getElementById("my-error-message").textContent = "";
+
+            fetch("/subscription/info", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phoneNumber: phoneNumber })
+            })
+                .then(response => {
+                    return response.json().then(body => ({ status: response.status, body })); // 응답을 객체로 변환
+                })
+                .then(({ status, body }) => {
+                    if (status >= 400) {
+                        const errorMessage = body.errors?.length > 0 ? body.errors[0].message : body.message || "서버 오류 발생";
+                        const myErrorMessageDiv = document.getElementById("my-error-message");
+                        myErrorMessageDiv.textContent = errorMessage;
+                        myErrorMessageDiv.style.display = "block";
+                        return;
+                    }
+                    if (!body.data || (typeof body.data === "object" && Object.keys(body.data).length === 0)) {
+                        alert("데이터가 없습니다.");
+                        return;
+                    }
+
+                    displaySubscriptions(body.data);
+                    fetchSubscriptionHistory(phoneNumber);
+                })
+                .catch(error => {
+                    console.error("구독 목록 불러오기 실패:", error);
+                    alert("구독 목록을 불러오는 데 실패했습니다.");
+                });
+        }
+
+        // 구독 목록을 모달에 표시
+        function displaySubscriptions(subscriptions) {
+            const normalSubContainer = document.getElementById("normal-subscriptions");
+            const premiumSubContainer = document.getElementById("premium-subscriptions");
+
+            normalSubContainer.innerHTML = "";
+            premiumSubContainer.innerHTML = "";
+
+            if (subscriptions.SUBSCRIBE && subscriptions.SUBSCRIBE.length > 0) {
+                subscriptions.SUBSCRIBE.forEach(sub => {
+                    const subscriptionCard = createSubscriptionCard(sub);
+                    normalSubContainer.appendChild(subscriptionCard);
+                });
+            } else {
+                normalSubContainer.innerHTML = "<p>데이터가 없습니다.</p>";
+            }
+
+            if (subscriptions.PREMIUM_SUBSCRIBE && subscriptions.PREMIUM_SUBSCRIBE.length > 0) {
+                subscriptions.PREMIUM_SUBSCRIBE.forEach(sub => {
+                    const subscriptionCard = createSubscriptionCard(sub);
+                    premiumSubContainer.appendChild(subscriptionCard);
+                });
+            } else {
+                premiumSubContainer.innerHTML = "<p>데이터가 없습니다.</p>";
+            }
+        }
+
+        function createSubscriptionCard(sub) {
+            const card = document.createElement("div");
+            card.classList.add("channel-card");
+            card.style.marginBottom = "10px";
+            card.style.display = "flex";
+            card.style.justifyContent = "space-between";
+            card.style.alignItems = "center";
+            card.style.transform = "none";
+
+            card.innerHTML = `
+                <div style="display: flex; flex-direction: column-reverse;">
+                    <div class="channel-name">${sub.channelName}</div>
+                    <div class="channel-info">${sub.status === 'PREMIUM_SUBSCRIBE' ? '[프리미엄]' : '[베이직]'}</div>
+                </div>
+
+                <div class="badge-parent">
+                    ${
+                        sub.canUnSubscribe
+                            ? sub.status === 'PREMIUM_SUBSCRIBE'
+                                ? `<button class="unsubscribe-btn unsubscribe-badge true" onclick="unsubscribe(${sub.channelId}, 'SUBSCRIBE')">베이직 전환</button>
+                                   <button class="unsubscribe-btn unsubscribe-badge true" onclick="unsubscribe(${sub.channelId}, 'UNSUBSCRIBE')">해지</button>`
+                                : `<button class="unsubscribe-btn unsubscribe-badge true" onclick="unsubscribe(${sub.channelId}, 'UNSUBSCRIBE')">해지</button>`
+                            : `<div class="unsubscribe-badge false">해지 불가</div>`
+                    }
+                </div>
+            `;
+
+            return card;
+        }
+
+        // 구독 해지 요청
+        function unsubscribe(channelId, status) {
+            const phoneNumber = myPhoneNumberInput.value.trim();
+            if (!phoneNumber) {
+                alert("휴대폰 번호를 입력해주세요.");
+                return;
+            }
+
+            fetch("/subscription", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phoneNumber, channelId, status })
+            })
+                .then(response => {
+                    return response.json().then(body => ({ status: response.status, body })); // 응답을 객체로 변환
+                })
+                .then(({ status, body }) => {
+                    if (status >= 400) {
+                        const errorMessage = body.errors?.length > 0 ? body.errors[0].message : body.message || "서버 오류 발생";
+                        const myErrorMessageDiv = document.getElementById("my-error-message");
+                        myErrorMessageDiv.textContent = errorMessage;
+                        myErrorMessageDiv.style.display = "block";
+                        alert(errorMessage);
+                        return;
+                    }
+                    alert("구독이 해지되었습니다.");
+                    fetchMySubscriptions();
+                })
+                .catch(error => {
+                    console.error("구독 해지 실패:", error);
+                    alert("구독 해지에 실패했습니다.");
+                });
+        }
+
+        function fetchSubscriptionHistory(phoneNumber) {
+            fetch(`/subscription/history?page=${currentPage}&size=2`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phoneNumber: phoneNumber })
+            })
+                .then(response => response.json().then(body => ({ status: response.status, body })))
+                .then(({ status, body }) => {
+                    if (status >= 400) {
+                        console.error("구독 히스토리 요청 실패:", body.message);
+                        return;
+                    }
+
+                    if (!body.data.content || !Array.isArray(body.data.content) || body.data.content.length === 0) {
+                        return;
+                    }
+
+
+                    appendSubscriptionHistory(body.data.content);
+
+                    currentPage++;
+
+                    // "더 보기" 버튼 처리
+                    handleLoadMoreButton(phoneNumber, body.data.last);
+                })
+                .catch(error => {
+                    console.error("구독 히스토리 불러오기 실패:", error);
+                    alert("구독 히스토리를 불러오는 데 실패했습니다.");
+                });
+        }
+
+        // 구독 히스토리 화면에 추가
+        function appendSubscriptionHistory(historyData) {
+            const historyContainer = document.getElementById("subscription-history");
+
+            historyData.forEach(history => {
+                const oldStatusText = convertStatusToKorean(history.oldStatus);
+                const newStatusText = convertStatusToKorean(history.newStatus);
+                const oldStatusColor = getStatusColor(history.oldStatus);
+                const newStatusColor = getStatusColor(history.newStatus);
+
+                const historyCard = document.createElement("div");
+                historyCard.classList.add("subscription-item");
+                historyCard.style.display = "flex";
+                historyCard.style.justifyContent = "space-between";
+                historyCard.style.alignItems = "center";
+                historyCard.style.marginBottom = "8px";
+                historyCard.style.padding = "8px";
+                historyCard.style.borderBottom = "1px solid #ddd";
+
+                historyCard.innerHTML = `
+                        <div style="display: flex; flex-direction: column;">
+                            <b><span>${history.channelName}</span></b>
+                            ${
+                            oldStatusText === "해지"
+                                ? `<span><b style="color: ${newStatusColor};">구독 시작</b></span>`
+                                : `<span>
+                                <b style="color: ${oldStatusColor};">${oldStatusText}</b>
+                                →
+                                <b style="color: ${newStatusColor};">${newStatusText}</b>
+                               </span>`
+                        }
+                        </div>
+
+                        <span style="font-size: 12px; color: gray;">${history.updatedDate}</span>
+                    `;
+
+                historyContainer.appendChild(historyCard);
+            });
+            if (loadMoreButton) {
+                historyContainer.appendChild(loadMoreButton);
+            }
+        }
+
+        // "더 보기" 버튼 추가 / 삭제
+        function handleLoadMoreButton(phoneNumber, isLastPage) {
+            if (!loadMoreButton) {
+                // 버튼이 없으면 최초 1회 생성
+                loadMoreButton = document.createElement("button");
+                loadMoreButton.id = "load-more-btn";
+                loadMoreButton.textContent = "더 보기";
+                loadMoreButton.style.marginTop = "10px";
+                loadMoreButton.style.padding = "10px 20px";
+                loadMoreButton.style.backgroundColor = "white";
+                loadMoreButton.style.cursor = "pointer";
+                loadMoreButton.style.margin = "0 auto";
+                loadMoreButton.style.border = "none";
+                loadMoreButton.style.textDecoration = "underline";
+
+                loadMoreButton.onclick = () => fetchSubscriptionHistory(phoneNumber);
+
+                // "구독 히스토리" 아래에 버튼 추가
+                document.getElementById("subscription-history").appendChild(loadMoreButton);
+            }
+
+            // 마지막 페이지일 경우 버튼 숨김
+            loadMoreButton.style.display = isLastPage ? "none" : "block";
+        }
+
+        function convertStatusToKorean(status) {
+            switch (status) {
+                case "SUBSCRIBE":
+                    return "구독";
+                case "PREMIUM_SUBSCRIBE":
+                    return "프리미엄";
+                case "UNSUBSCRIBE":
+                    return "해지";
+                default:
+                    return status;
+            }
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case "SUBSCRIBE":
+                    return "#28a745";  // 구독
+                case "PREMIUM_SUBSCRIBE":
+                    return "#ffdd5b";  // 프리미엄
+                case "UNSUBSCRIBE":
+                    return "#ff0000";  // 해지
+                default:
+                    return "#000000";  // 기본 검정색
+            }
+        }
+
+        window.unsubscribe = unsubscribe;
     });
 </script>
 

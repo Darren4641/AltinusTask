@@ -30,8 +30,6 @@ public class SubscriptionHistory extends BaseEntity {
     @Column(nullable = false)
     private SubscriptionStatus newStatus;
 
-    @Column(nullable = false)
-    private LocalDateTime changedAt;
 
     @Column(nullable = false)
     private String channelName; // 그 당시 구독 채널 이름을 저장 하기 위해 컬럼 추가
@@ -41,6 +39,5 @@ public class SubscriptionHistory extends BaseEntity {
         this.oldStatus = oldStatus;
         this.newStatus = newStatus;
         this.channelName = channelName;
-        this.changedAt = LocalDateTime.now();
     }
 }
