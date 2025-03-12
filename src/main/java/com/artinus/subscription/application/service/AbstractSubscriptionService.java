@@ -115,6 +115,8 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
             throw new ApiErrorException(ResultCode.DISABLED_SUBSCRIBE);
         }
 
+        beforeSubscribe();
+
         // 2. 구독 여부 확인
         // 각각 구현체에서 구현
         log.info("[구독] 2. 구독 여부 확인");
@@ -147,6 +149,8 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
         // 5. 외부 API 호출
         callAltinusSubscribe();
         log.info("[구독 완료]");
+
+        afterSubscribe();
         return subscriptionConverter.toSubscriptionResponseDto(subscriptionEntity, channelEntity);
     }
 
@@ -167,7 +171,7 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
         if(!channelEntity.getCanUnSubscribe()) {
             throw new ApiErrorException(ResultCode.DISABLED_UNSUBSCRIBE);
         }
-
+        beforeUnSubscribe();
         /*
         * 만약 프리미엄 구독 -> 일반 구독 은 가능한다그러면 아래 코드로 예외처리 변경
         if(!channelEntity.getCanUnSubscribe() &&
@@ -212,6 +216,9 @@ public abstract class AbstractSubscriptionService implements SubscriptionService
         // 외부 API 호출
         callAltinusSubscribe();
         log.info("[구독 해지 완료]");
+
+        afterUnSubscribe();
+
         return subscriptionConverter.toSubscriptionResponseDto(subscriptionEntity, channelEntity);
     }
 

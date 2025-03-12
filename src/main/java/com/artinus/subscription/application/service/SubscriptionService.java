@@ -15,9 +15,14 @@ public interface SubscriptionService {
     List<ChannelListResponseDto> findAllChannels();
 
     Boolean callAltinusSubscribe();
-    SubscriptionResponseDto subscribe(SubscriptionCreateRequestDto subscriptionCreateRequestDto);
-    SubscriptionResponseDto unSubscribe(SubscriptionDeleteRequestDto subscriptionDeleteRequestDto, SubscriptionDto subscriptionDto);
 
+    void beforeSubscribe();
+    SubscriptionResponseDto subscribe(SubscriptionCreateRequestDto subscriptionCreateRequestDto);
+    void afterSubscribe();
+
+    void beforeUnSubscribe();
+    SubscriptionResponseDto unSubscribe(SubscriptionDeleteRequestDto subscriptionDeleteRequestDto, SubscriptionDto subscriptionDto);
+    void afterUnSubscribe();
     SubscriptionDto getSubscription(String phoneNumber, Long channelId);
 
     ValidateSubscriptionResponseDto validateSubscribe(String phoneNumber, Channel channel, SubscriptionStatus newStatus);

@@ -44,6 +44,26 @@ public class PremiumSubscriptionService extends AbstractSubscriptionService {
         );
     }
 
+    @Override
+    public void beforeSubscribe() {
+        //TODO 결제 등등 구현체 적용
+    }
+
+    @Override
+    public void afterSubscribe() {
+        //TODO 결제 등등 구현체 적용
+    }
+
+    @Override
+    public void beforeUnSubscribe() {
+        //TODO 결제 등등 구현체 적용
+    }
+
+    @Override
+    public void afterUnSubscribe() {
+        //TODO 결제 등등 구현체 적용
+    }
+
     /**
      * ValidateSubscriptionResponseDto 기준으로 Subscription, History 저장 또는 변경
      * @param phoneNumber   구독자 전화번호
