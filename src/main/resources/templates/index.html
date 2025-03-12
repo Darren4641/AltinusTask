@@ -23,18 +23,43 @@
             max-width: 1200px;
             width: 100%;
         }
+   /*     .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }*/
 
         .title {
             text-align: center;
             font-size: 24px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .my-sub {
+            border: 2px solid white;
+            border-radius: 12px;
+            background-color: #111827;
+            color: white;
+            cursor: pointer;
+            padding: 8px 16px;
+            position: absolute;
+            right: 22px;
+        }
+
+        .my-sub:hover {
+            background-color: #1e293b; /* 호버 시 더 밝은 다크 블루 */
         }
 
         .channel-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 15px;
+        }
+
+        .channel-grid div {
+            text-align: left;
         }
 
         .channel-card {
@@ -44,10 +69,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
             transition: transform 0.2s ease-in-out;
-        }
-
-        .channel-card div {
-            text-align: left;
+            cursor: pointer;
         }
 
         .channel-card:hover {
@@ -84,21 +106,153 @@
         .unsubscribe-badge.false {
             background-color: #dc3545;
         }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 350px;
+            text-align: center;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: space-between;
+        }
+
+        .modal-buttons button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .subscribe-btn {
+            background-color: #5e6b79;
+            flex: 1;
+            color: white;
+        }
+
+        .premium-subscribe-btn {
+            background-color: #ffdd5b;
+            flex: 1;
+            color: #2a2a2a;
+        }
+
+        .close-btn {
+            float: right;
+            background-color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .subscription-list {
+            padding: 20px;
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none; /* 기본적으로 숨김 */
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <button class="my-sub" id="my-subscriptions">구독 조회</button>
     <div class="title">채널 목록</div>
     <div id="channel-list" class="channel-grid"></div>
+
+
 </div>
+
+<!-- 모달 -->
+<div id="subscribe-modal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" id="close-modal">X</button>
+        <h3 id="modal-title">채널 구독</h3>
+        <input type="text" id="phone-number" placeholder="휴대폰 번호 입력">
+        <div class="modal-buttons">
+            <button class="subscribe-btn" id="subscribe-btn">일반 구독</button>
+            <button class="premium-subscribe-btn" id="premium-subscribe-btn">프리미엄 구독</button>
+        </div>
+        <div id="error-message" class="error-message"></div>
+
+    </div>
+</div>
+
+<!-- 내 구독 모달 -->
+<div id="my-sub-modal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" id="close-my-sub-modal">X</button>
+        <h3>내 구독 목록</h3>
+        <div style="display: flex; gap: 10px; align-items: center; justify-content: center; margin-bottom: 15px;">
+            <input style="flex:3;" type="text" id="my-phone-number" placeholder="휴대폰 번호 입력">
+            <button style="flex:1; height: 38px; border-radius: 5px; border: none; background-color: #28a745; color: white;" id="fetch-my-subscriptions">조회</button>
+        </div>
+
+        <div id="subscriptions-container">
+            <h4 style="text-align: left;">일반 구독</h4>
+            <hr>
+            <div id="normal-subscriptions" class="subscription-list">
+                데이터가 없습니다.
+            </div>
+
+            <h4 style="text-align: left;">프리미엄 구독 목록</h4>
+            <hr>
+            <div id="premium-subscriptions" class="subscription-list">
+                데이터가 없습니다.
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById("subscribe-modal");
+        const mySubModal = document.getElementById("my-sub-modal");
+        const modalTitle = document.getElementById("modal-title");
+        const phoneNumberInput = document.getElementById("phone-number");
+        const myPhoneNumberInput = document.getElementById("my-phone-number");
+        const subscribeButton = document.getElementById("subscribe-btn");
+        const premiumSubscribeButton = document.getElementById("premium-subscribe-btn");
+        const closeModalButton = document.getElementById("close-modal");
+        const mySubModalCloseButton = document.getElementById("close-my-sub-modal");
+        const mySubButton = document.getElementById("my-subscriptions");
+        let selectedChannelId = null;
+
+        // 채널 목록 가져오기
         fetch("/v1/channel")
             .then(response => response.json())
             .then(data => {
-                const channels = data.data; // JSON 응답에서 "data" 키를 가져옴
+                const channels = data.data;
                 const channelList = document.getElementById("channel-list");
 
                 channels.forEach(channel => {
@@ -106,24 +260,96 @@
                     channelCard.classList.add("channel-card");
 
                     channelCard.innerHTML = `
-                            <div class="channel-info">ID: ${channel.id}</div>
-                            <div class="channel-name">${channel.name}</div>
-                            <div class="channel-info">생성일: ${channel.createdDate}</div>
-                            <div class="badge-parent">
-                                <div class="unsubscribe-badge ${channel.canSubscribe ? 'true' : 'false'}">
-                                ${channel.canSubscribe ? "구독 가능" : "구독 불가"}
-                                </div>
-                                <div class="unsubscribe-badge ${channel.canUnSubscribe ? 'true' : 'false'}">
-                                    ${channel.canUnSubscribe ? "해지 가능" : "해지 불가"}
-                                </div>
+                        <div class="channel-info">ID: ${channel.id}</div>
+                        <div class="channel-name">${channel.name}</div>
+                        <div class="channel-info">생성일: ${channel.createdDate}</div>
+                        <div class="badge-parent">
+                            <div class="unsubscribe-badge ${channel.canSubscribe ? 'true' : 'false'}">
+                            ${channel.canSubscribe ? "구독 가능" : "구독 불가"}
                             </div>
+                            <div class="unsubscribe-badge ${channel.canUnSubscribe ? 'true' : 'false'}">
+                                ${channel.canUnSubscribe ? "해지 가능" : "해지 불가"}
+                            </div>
+                        </div>
+                    `;
 
-                        `;
+                    channelCard.addEventListener("click", () => {
+                        selectedChannelId = channel.id;
+                        modalTitle.textContent = `${channel.name} 구독`;
+                        modal.style.display = "flex";
+                    });
 
                     channelList.appendChild(channelCard);
                 });
             })
             .catch(error => console.error("데이터 로드 실패:", error));
+
+        // 구독 요청 함수
+        function subscribe(subscriptionStatus) {
+            const phoneNumber = phoneNumberInput.value.trim();
+            if (!phoneNumber) {
+                alert("휴대폰 번호를 입력해주세요.");
+                return;
+            }
+
+            fetch("/subscription", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    phoneNumber: phoneNumber,
+                    channelId: selectedChannelId,
+                    status: subscriptionStatus
+                })
+            })
+                .then(response => {
+                    return response.json().then(body => ({ status: response.status, body })); // 응답을 객체로 변환
+                })
+                .then(({ status, body }) => {
+                    if (status >= 400) {
+                        const errorMessage = body.errors?.length > 0 ? body.errors[0].message : body.message || "서버 오류 발생";
+                        showErrorMessage(errorMessage);
+                        return;
+                    }
+                    alert(`구독이 완료 되었습니다! 채널: ${body.data.channelName}, 상태: ${body.data.status}`);
+                    closeModal();
+                })
+                .catch(error => {
+                    console.error("구독 요청 실패:", error);
+                    alert("구독 요청 실패");
+                });
+        }
+
+        // 일반 구독 버튼 클릭 이벤트
+        subscribeButton.addEventListener("click", () => subscribe("SUBSCRIBE"));
+
+        // 프리미엄 구독 버튼 클릭 이벤트
+        premiumSubscribeButton.addEventListener("click", () => subscribe("PREMIUM_SUBSCRIBE"));
+
+        mySubButton.addEventListener("click", () => {
+            mySubModal.style.display = "flex"
+        });
+
+        // 모달 닫기 버튼
+        closeModalButton.addEventListener("click", () => {
+            closeModal();
+        });
+
+        mySubModalCloseButton.addEventListener("click", () => {
+            mySubModal.style.display = "none";
+            myPhoneNumberInput.value = "";
+            document.getElementById("error-message").style.display = "none"; // 에러 메시지 숨김
+        });
+        function showErrorMessage(message) {
+            const errorMessageDiv = document.getElementById("error-message");
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.style.display = "block"; // 표시
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+            phoneNumberInput.value = "";
+            document.getElementById("error-message").style.display = "none"; // 에러 메시지 숨김
+        }
     });
 </script>
 

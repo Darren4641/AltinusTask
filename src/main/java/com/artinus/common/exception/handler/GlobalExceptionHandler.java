@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(
                 new ExceptionMsg(ResultCode.INVALID_PARAMETER.getMessage(), ResultCode.INVALID_PARAMETER.getCode(), false, errors),
-                HttpStatus.OK
+                HttpStatus.BAD_REQUEST
         );
     }
 
@@ -94,7 +94,7 @@ public class GlobalExceptionHandler {
                         false,
                         List.of(new FieldErrorDetail(ex.getParameterName(), ex.getMessage()))
                 ),
-                HttpStatus.OK
+                HttpStatus.BAD_REQUEST
         );
     }
 
@@ -111,7 +111,7 @@ public class GlobalExceptionHandler {
                         false,
                         List.of(new FieldErrorDetail(ex.getName(), message))
                 ),
-                HttpStatus.OK
+                HttpStatus.BAD_REQUEST
         );
     }
 
