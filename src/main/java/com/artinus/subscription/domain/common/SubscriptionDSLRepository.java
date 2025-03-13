@@ -1,10 +1,10 @@
-package com.artinus.subscription.domain.repository;
+package com.artinus.subscription.domain.common;
 
 import com.artinus.subscription.application.dto.response.SubscriptionDetailResponseDto;
 import com.artinus.subscription.application.dto.response.SubscriptionDto;
 import com.artinus.subscription.application.dto.response.SubscriptionHistoryDto;
-import com.artinus.subscription.domain.model.Subscription;
-import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
+import com.artinus.subscription.domain.subscription.Subscription;
+import com.artinus.subscription.domain.common.SubscriptionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

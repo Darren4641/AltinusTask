@@ -2,13 +2,12 @@ package com.artinus.subscription.application.converter;
 
 import com.artinus.subscription.application.dto.request.SubscriptionCreateRequestDto;
 import com.artinus.subscription.application.dto.request.SubscriptionDeleteRequestDto;
-import com.artinus.subscription.application.dto.response.SubscriptionDto;
 import com.artinus.subscription.application.dto.response.SubscriptionResponseDto;
 import com.artinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
 import com.artinus.subscription.application.dto.response.ValidateUnSubscriptionResponseDto;
-import com.artinus.subscription.domain.model.Channel;
-import com.artinus.subscription.domain.model.Subscription;
-import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
+import com.artinus.subscription.domain.channel.Channel;
+import com.artinus.subscription.domain.subscription.Subscription;
+import com.artinus.subscription.domain.common.SubscriptionStatus;
 import com.artinus.subscription.ui.dto.request.SubscriptionCreateRequestApiDto;
 import com.artinus.subscription.ui.dto.request.SubscriptionDeleteRequestApiDto;
 import com.artinus.subscription.ui.dto.response.SubscriptionCreateResponseApiDto;

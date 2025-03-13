@@ -3,9 +3,9 @@ package com.artinus.subscription.infrastructure.repository;
 import com.artinus.subscription.application.dto.response.SubscriptionDetailResponseDto;
 import com.artinus.subscription.application.dto.response.SubscriptionDto;
 import com.artinus.subscription.application.dto.response.SubscriptionHistoryDto;
-import com.artinus.subscription.domain.model.Subscription;
-import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
-import com.artinus.subscription.domain.repository.SubscriptionDSLRepository;
+import com.artinus.subscription.domain.subscription.Subscription;
+import com.artinus.subscription.domain.common.SubscriptionStatus;
+import com.artinus.subscription.domain.common.SubscriptionDSLRepository;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -20,9 +20,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.artinus.subscription.domain.model.QChannel.channel;
-import static com.artinus.subscription.domain.model.QSubscription.subscription;
-import static com.artinus.subscription.domain.model.QSubscriptionHistory.subscriptionHistory;
+import static com.artinus.subscription.domain.channel.QChannel.channel;
+import static com.artinus.subscription.domain.history.QSubscriptionHistory.subscriptionHistory;
+import static com.artinus.subscription.domain.subscription.QSubscription.subscription;
+
 
 @Repository
 public class SubscriptionDSLRepositoryImpl implements SubscriptionDSLRepository {

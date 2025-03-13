@@ -6,8 +6,7 @@ import com.artinus.subscription.application.dto.request.SubscriptionCreateReques
 import com.artinus.subscription.application.dto.request.SubscriptionDeleteRequestDto;
 import com.artinus.subscription.application.dto.response.*;
 import com.artinus.subscription.application.service.SubscriptionService;
-import com.artinus.subscription.domain.model.SubscriptionHistory;
-import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
+import com.artinus.subscription.domain.common.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

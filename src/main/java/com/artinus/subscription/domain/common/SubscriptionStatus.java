@@ -1,4 +1,4 @@
-package com.artinus.subscription.domain.model.enums;
+package com.artinus.subscription.domain.common;
 
 public enum SubscriptionStatus {
     PREMIUM_SUBSCRIBE,

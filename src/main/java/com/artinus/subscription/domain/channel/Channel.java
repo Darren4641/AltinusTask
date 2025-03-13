@@ -1,4 +1,4 @@
-package com.artinus.subscription.domain.model;
+package com.artinus.subscription.domain.channel;
 
 import com.artinus.common.domain.BaseEntity;
 import jakarta.persistence.*;

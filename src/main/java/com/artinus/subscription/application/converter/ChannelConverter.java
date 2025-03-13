@@ -1,7 +1,7 @@
 package com.artinus.subscription.application.converter;
 
 import com.artinus.subscription.application.dto.response.ChannelListResponseDto;
-import com.artinus.subscription.domain.model.Channel;
+import com.artinus.subscription.domain.channel.Channel;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

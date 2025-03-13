@@ -1,6 +1,6 @@
 package com.artinus.subscription.application.dto.response;
 
-import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
+import com.artinus.subscription.domain.common.SubscriptionStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

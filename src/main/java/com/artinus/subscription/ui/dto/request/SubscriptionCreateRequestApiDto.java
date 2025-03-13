@@ -1,6 +1,6 @@
 package com.artinus.subscription.ui.dto.request;
 
-import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
+import com.artinus.subscription.domain.common.SubscriptionStatus;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

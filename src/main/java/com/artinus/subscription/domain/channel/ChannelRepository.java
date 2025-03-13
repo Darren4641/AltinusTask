@@ -1,6 +1,6 @@
-package com.artinus.subscription.domain.repository;
+package com.artinus.subscription.domain.channel;
 
-import com.artinus.subscription.domain.model.Channel;
+import com.artinus.subscription.domain.channel.Channel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

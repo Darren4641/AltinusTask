@@ -8,7 +8,7 @@ import com.artinus.subscription.application.dto.request.SubscriptionDeleteReques
 import com.artinus.subscription.application.dto.response.SubscriptionDetailResponseDto;
 import com.artinus.subscription.application.dto.response.SubscriptionHistoryDto;
 import com.artinus.subscription.application.dto.response.SubscriptionResponseDto;
-import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
+import com.artinus.subscription.domain.common.SubscriptionStatus;
 import com.artinus.subscription.ui.dto.request.PhoneNumberApiDto;
 import com.artinus.subscription.ui.dto.request.SubscriptionCreateRequestApiDto;
 import com.artinus.subscription.ui.dto.request.SubscriptionDeleteRequestApiDto;

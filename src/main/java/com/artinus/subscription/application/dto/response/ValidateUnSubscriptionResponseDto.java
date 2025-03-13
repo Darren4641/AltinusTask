@@ -1,7 +1,7 @@
 package com.artinus.subscription.application.dto.response;
 
-import com.artinus.subscription.domain.model.Channel;
-import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
+import com.artinus.subscription.domain.channel.Channel;
+import com.artinus.subscription.domain.common.SubscriptionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

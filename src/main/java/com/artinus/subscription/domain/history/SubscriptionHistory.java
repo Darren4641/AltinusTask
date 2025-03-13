@@ -1,13 +1,11 @@
-package com.artinus.subscription.domain.model;
+package com.artinus.subscription.domain.history;
 
 import com.artinus.common.domain.BaseEntity;
-import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
+import com.artinus.subscription.domain.common.SubscriptionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor

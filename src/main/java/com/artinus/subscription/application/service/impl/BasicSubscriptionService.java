@@ -1,7 +1,5 @@
 package com.artinus.subscription.application.service.impl;
 
-import com.artinus.common.exception.ApiErrorException;
-import com.artinus.common.response.enums.ResultCode;
 import com.artinus.subscription.application.converter.ChannelConverter;
 import com.artinus.subscription.application.converter.SubscriptionConverter;
 import com.artinus.subscription.application.converter.SubscriptionHistoryConverter;
@@ -9,12 +7,12 @@ import com.artinus.subscription.application.dto.response.SubscriptionDto;
 import com.artinus.subscription.application.dto.response.ValidateSubscriptionResponseDto;
 import com.artinus.subscription.application.dto.response.ValidateUnSubscriptionResponseDto;
 import com.artinus.subscription.application.service.AbstractSubscriptionService;
-import com.artinus.subscription.domain.model.Channel;
-import com.artinus.subscription.domain.model.enums.SubscriptionStatus;
-import com.artinus.subscription.domain.repository.ChannelRepository;
-import com.artinus.subscription.domain.repository.SubscriptionDSLRepository;
-import com.artinus.subscription.domain.repository.SubscriptionHistoryRepository;
-import com.artinus.subscription.domain.repository.SubscriptionRepository;
+import com.artinus.subscription.domain.channel.Channel;
+import com.artinus.subscription.domain.common.SubscriptionStatus;
+import com.artinus.subscription.domain.channel.ChannelRepository;
+import com.artinus.subscription.domain.common.SubscriptionDSLRepository;
+import com.artinus.subscription.domain.history.SubscriptionHistoryRepository;
+import com.artinus.subscription.domain.subscription.SubscriptionRepository;
 import com.artinus.subscription.infrastructure.external.service.CsrngExternalService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
