@@ -16,6 +16,8 @@
 | url                   | https://artinus.tonglink.site  |
 |-----------------------|--------------------------------|
 
+# 시연 영상
+<img src="./artinus.gif">
 
 # application-dev.yml 수정
 ```yml

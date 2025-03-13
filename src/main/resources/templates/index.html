@@ -321,6 +321,7 @@
                     if (status >= 400) {
                         const errorMessage = body.errors?.length > 0 ? body.errors[0].message : body.message || "서버 오류 발생";
                         showErrorMessage(errorMessage);
+                        alert(errorMessage);
                         return;
                     }
                     alert(`구독이 완료 되었습니다! 채널: ${body.data.channelName}, 상태: ${body.data.status}`);
