@@ -359,3 +359,37 @@ Channel에서는 Subscription이 자주 조회되지 않다고 판단하여 @One
 그 외에 구독이 여러번 되는 경우를 막기 위해 (phoneNumber, channelId) 를 복합 유니크키를 걸어 데이터의 무결성을 유지하였습니다.
 
 또한 외래키에 대해 인덱싱을 걸어 조회시 성능을 향상시켰습니다.
+
+# + 인터셉터 추기
+```java
+@Slf4j
+@Component
+public class RequestLoggingInterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        String method = request.getMethod();
+        String uri = request.getRequestURI();
+        String queryString = (request.getQueryString() != null) ? "?" + request.getQueryString() : "";
+
+        // 요청 파라미터 추출
+        Map<String, String[]> parameterMap = request.getParameterMap();
+        String parameters = parameterMap.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + String.join(",", entry.getValue()))
+                .collect(Collectors.joining(", "));
+
+        log.info("[URL:" + uri + queryString + "] [METHOD:" + method + "] [PARAMETERS:{" + parameters + "}] [STATUS:" + response.getStatus() + "]");
+
+        return true; // 요청 처리를 계속 진행
+    }
+}
+```
+
+모든 api에 대해서 로깅을 추가하였습니다. 각 요청의 종류 그리고 엔드포인트와 파라미터를 로그에 남겼습니다.
+
+```text
+ex)
+2025-03-13T22:57:08.766+09:00  INFO 5948 --- [nio-8080-exec-1] c.a.c.i.RequestLoggingInterceptor        : [URL:/subscription/info] [METHOD:POST] [PARAMETERS:{}] [STATUS:200]
+2025-03-13T22:57:09.009+09:00  INFO 5948 --- [nio-8080-exec-2] c.a.c.i.RequestLoggingInterceptor        : [URL:/subscription/history?page=0&size=2] [METHOD:POST] [PARAMETERS:{page=0, size=2}] [STATUS:200]
+```
+
