@@ -305,7 +305,7 @@
                 return;
             }
 
-            fetch("/subscription", {
+            fetch("/v1/subscription", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -394,7 +394,7 @@
             loadMoreButton = null;
             document.getElementById("my-error-message").textContent = "";
 
-            fetch("/subscription/info", {
+            fetch("/v1/subscription/info", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ phoneNumber: phoneNumber })
@@ -489,7 +489,7 @@
                 return;
             }
 
-            fetch("/subscription", {
+            fetch("/v1/subscription", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ phoneNumber, channelId, status })
@@ -516,7 +516,7 @@
         }
 
         function fetchSubscriptionHistory(phoneNumber) {
-            fetch(`/subscription/history?page=${currentPage}&size=2`, {
+            fetch(`/v1/subscription/history?page=${currentPage}&size=2`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ phoneNumber: phoneNumber })

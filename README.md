@@ -360,7 +360,116 @@ Channel에서는 Subscription이 자주 조회되지 않다고 판단하여 @One
 
 또한 외래키에 대해 인덱싱을 걸어 조회시 성능을 향상시켰습니다.
 
-# + 인터셉터 추기
+# 예외 처리
+ControllerAdvice를 이용하여, 예외를 전역 처리하였습니다.
+
+비즈니스 로직에서 직접 던지는 Exception은 ApiErrorException 을 이용하여 던졌으며, 그 외에는 각 Exception 별로 예외를 핸들링하여 에러 메시지를 뿌려주었습니다.
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    private static final ResponseEntity<ExceptionMsg> GENERIC_ERROR = new ResponseEntity<>(
+            new ExceptionMsg(ResultCode.ERROR.getMessage(), ResultCode.ERROR.getCode(), false, List.of()),
+            HttpStatus.BAD_REQUEST
+    );
+
+    @ExceptionHandler(ApiErrorException.class)
+    public ResponseEntity<ExceptionMsg> handleApiErrorException(ApiErrorException ex) {
+        return new ResponseEntity<>(
+                new ExceptionMsg(ex.getResultCode().getMessage(), ex.getResultCode().getCode(), false, List.of()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ExceptionMsg> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        return new ResponseEntity<>(
+                new ExceptionMsg(ResultCode.SUBSCRIBE_UNIQUE.getMessage(), ResultCode.SUBSCRIBE_UNIQUE.getCode(), false, List.of()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ExceptionMsg> handleMethodValidException(MethodArgumentNotValidException ex) {
+        List<FieldErrorDetail> errors = ex.getBindingResult().getAllErrors().stream()
+                .map(error -> new FieldErrorDetail(((FieldError) error).getField(), error.getDefaultMessage()))
+                .toList();
+
+        return new ResponseEntity<>(
+                new ExceptionMsg(ResultCode.INVALID_PARAMETER.getMessage(), ResultCode.INVALID_PARAMETER.getCode(), false, errors),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ExceptionMsg> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        Throwable rootCause = ex.getCause();
+        List<FieldErrorDetail> errors;
+
+        if (rootCause instanceof InvalidFormatException formatException) {
+            errors = formatException.getPath().stream()
+                    .map(reference -> new FieldErrorDetail(
+                            reference.getFieldName(),
+                            "[" + reference.getFieldName() + "] 가 타입이 올바르지 않습니다.")
+                    ).toList();
+        } else if (rootCause instanceof JsonMappingException mappingException) {
+            errors = mappingException.getPath().stream()
+                    .map(reference -> new FieldErrorDetail(
+                            reference.getFieldName(),
+                            "[" + reference.getFieldName() + "] 가 누락되었습니다.")
+                    ).toList();
+        } else {
+            errors = List.of(new FieldErrorDetail("", rootCause != null ? rootCause.getMessage() : "에러 발생"));
+        }
+
+        ExceptionMsg response = new ExceptionMsg(
+                ResultCode.INVALID_PARAMETER.getMessage(),
+                ResultCode.INVALID_PARAMETER.getCode(),
+                false,
+                errors
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ExceptionMsg> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
+        return new ResponseEntity<>(
+                new ExceptionMsg(
+                        ResultCode.INVALID_PARAMETER.getMessage(),
+                        ResultCode.INVALID_PARAMETER.getCode(),
+                        false,
+                        List.of(new FieldErrorDetail(ex.getParameterName(), ex.getMessage()))
+                ),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ExceptionMsg> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String message = ex.getRequiredType() != null && ex.getRequiredType().isEnum()
+                ? "유효한 값: " + List.of(ex.getRequiredType().getEnumConstants()).toString()
+                : "Invalid value for parameter '" + ex.getName() + "'";
+
+        return new ResponseEntity<>(
+                new ExceptionMsg(
+                        ResultCode.INVALID_PARAMETER.getMessage(),
+                        ResultCode.INVALID_PARAMETER.getCode(),
+                        false,
+                        List.of(new FieldErrorDetail(ex.getName(), message))
+                ),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ExceptionMsg> handleException(Exception ex) {
+        ex.printStackTrace();
+        return GENERIC_ERROR;
+    }
+}
+```
+
+# + 인터셉터 추가
 ```java
 @Slf4j
 @Component

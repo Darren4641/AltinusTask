@@ -6,6 +6,7 @@ import com.artinus.common.exception.dto.FieldErrorDetail;
 import com.artinus.common.response.enums.ResultCode;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.util.List;
 
+@Hidden
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final ResponseEntity<ExceptionMsg> GENERIC_ERROR = new ResponseEntity<>(
