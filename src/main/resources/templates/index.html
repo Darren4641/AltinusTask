@@ -410,10 +410,6 @@
                         myErrorMessageDiv.style.display = "block";
                         return;
                     }
-                    if (!body.data || (typeof body.data === "object" && Object.keys(body.data).length === 0)) {
-                        alert("데이터가 없습니다.");
-                        return;
-                    }
 
                     displaySubscriptions(body.data);
                     fetchSubscriptionHistory(phoneNumber);
