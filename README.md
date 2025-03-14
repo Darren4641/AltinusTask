@@ -11,11 +11,11 @@
 |----------|
 | IntelliJ |
 
-## Demo URL
+## Demo URL && Swagger URL
 
-| url                   | https://artinus.tonglink.site  |
-|-----------------------|--------------------------------|
-
+| url         | https://artinus.tonglink.site  |
+|-------------|--------------------------------|
+| Swagger url | https://artinus.tonglink.site/swagger-ui/index.html  |
 # 시연 영상
 <img src="./artinus.gif">
 

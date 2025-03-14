@@ -80,7 +80,7 @@ public class SubscriptionController {
      */
     @Operation(summary = "나의 구독 정보", description = "현재 입력한 번호의 구독 정보를 구독 형태별로 반환합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "구독 해지 성공")
+            @ApiResponse(responseCode = "200", description = "구독 정보 조회 성공")
     })
     @PostMapping(value = "/info")
     public BaseResponse<Map<SubscriptionStatus, List<SubscriptionDetailResponseDto>>> mySubscription(@RequestBody @Valid PhoneNumberApiDto phoneNumberApiDto) {
@@ -95,7 +95,7 @@ public class SubscriptionController {
      */
     @Operation(summary = "나의 구독 내역", description = "현재 입력한 번호의 구독 내역을 Paging처리하여 보여줍니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "구독 해지 성공")
+            @ApiResponse(responseCode = "200", description = "구독 내역 조회 성공")
     })
     @PostMapping(value = "/history")
     public BaseResponse<Page<SubscriptionHistoryDto>> mySubscriptionHistory(@RequestParam(value = "page", defaultValue = "0") int page,
