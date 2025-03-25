@@ -11,7 +11,7 @@
 |----------|
 | IntelliJ |
 
-## Demo URL && Swagger URL
+## Demo URL && Swagger URL (3월 27일 부터 이사를 하게되어 서버가 잠시 중단됩니다)
 
 | url         | https://artinus.tonglink.site  |
 |-------------|--------------------------------|
